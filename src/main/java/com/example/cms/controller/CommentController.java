@@ -43,6 +43,14 @@ public class CommentController {
 
     }
 
+    @DeleteMapping("/comments/{commentInfo}")
+    public String deleteCoursePlan(@PathVariable String commentInfo) {
+        String[] parts = commentInfo.split("~");
+        CommentKey commentKey = new CommentKey(Long.valueOf(parts[0]), parts[1], parts[2]);
+        commentRepository.deleteById(commentKey);
+        return "Course plan deleted successfully";
+    }
+
     @GetMapping("/comments")
     List<Comment> retrieveAllComment() {
         return this.commentRepository.findAll();
