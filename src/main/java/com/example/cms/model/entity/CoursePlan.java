@@ -5,8 +5,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotEmpty;
-import java.util.Set;
+import javax.validation.constraints.NotNull;
+import java.util.HashMap;
+import java.util.Map;
 
 @Entity
 @NoArgsConstructor
@@ -17,27 +18,24 @@ public class CoursePlan {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long  id;
+    private Long id;
 
-    @NotEmpty
-    @Column(name = "student_id")
+    @NotNull
+    @Column(name = "student_id", nullable = false)
     private Long studentId;
 
-    @NotEmpty
-    private String semester;
+    @ElementCollection
+    @CollectionTable(name = "course_plan_semesters", joinColumns = @JoinColumn(name = "course_plan_id"))
+    @MapKeyColumn(name = "course_code")
+    @Column(name = "semester")
+    private Map<String, String> courseSemesterMap = new HashMap<>();
 
-    @ManyToMany
-    @JoinTable(
-            name = "course_plan_courses",
-            joinColumns = @JoinColumn(name = "course_plan_id"),
-            inverseJoinColumns = @JoinColumn(name = "course_code")
-    )
-
-    private Set<Course> courses;
-
-    public CoursePlan(Long studentId, String semester, Set<Course> courses){
+    public CoursePlan(Long studentId, Map<String, String> courseSemesterMap) {
         this.studentId = studentId;
-        this.semester = semester;
-        this.courses = courses;
+        this.courseSemesterMap = courseSemesterMap != null ? courseSemesterMap : new HashMap<>();
+    }
+
+    public void updateCourseSemester(String courseCode, String semester) {
+        this.courseSemesterMap.put(courseCode, semester);
     }
 }
