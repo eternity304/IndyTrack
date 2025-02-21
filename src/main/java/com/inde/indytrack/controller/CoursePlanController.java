@@ -32,15 +32,15 @@ public class CoursePlanController {
         return "Course plan deleted successfully";
     }
 
-    @PutMapping("/{planId}/add-course/{courseCode}")
-    public CoursePlan addCourse(@PathVariable Long planId, @PathVariable String courseCode) {
+    @PutMapping("/{planId}/add-course/{courseCode}/semester/{semester}")
+    public CoursePlan addCourse(@PathVariable Long planId, @PathVariable String courseCode, @PathVariable String semester) {
         CoursePlan coursePlan = coursePlanRepository.findById(planId)
                 .orElseThrow(() -> new RuntimeException("Course Plan not found"));
 
         Course course = courseRepository.findById(courseCode)
                 .orElseThrow(() -> new RuntimeException("Course not found"));
 
-        coursePlan.getCourses().add(course);
+        coursePlan.updateCourseSemester(courseCode, semester);
         return coursePlanRepository.save(coursePlan);
     }
 
@@ -49,12 +49,33 @@ public class CoursePlanController {
         CoursePlan coursePlan = coursePlanRepository.findById(planId)
                 .orElseThrow(() -> new RuntimeException("Course Plan not found"));
 
-        coursePlan.getCourses().removeIf(course -> course.getCode().equals(courseCode));
+        Course course = courseRepository.findById(courseCode)
+                .orElseThrow(() -> new RuntimeException("Course not found"));
+
+        coursePlan.getCourseSemesterMap().remove(courseCode);
         return coursePlanRepository.save(coursePlan);
     }
 
+    @PutMapping("/{planId}/modify-course/{courseCode}/move-to-semester/{semester}")
+    public CoursePlan modifyCourse(
+            @PathVariable Long planId,
+            @PathVariable String courseCode,
+            @PathVariable String semester) {
+
+        CoursePlan coursePlan = coursePlanRepository.findById(planId)
+                .orElseThrow(() -> new RuntimeException("Course Plan not found"));
+
+        Course course = courseRepository.findById(courseCode)
+                .orElseThrow(() -> new RuntimeException("Course not found"));
+
+        coursePlan.updateCourseSemester(courseCode, semester);
+
+        return coursePlanRepository.save(coursePlan);
+    }
+
+
     @GetMapping
-    public List<CoursePlan> getAllCoursePlans(){
+    public List<CoursePlan> getAllCoursePlans() {
         return coursePlanRepository.findAll();
     }
 
@@ -67,5 +88,6 @@ public class CoursePlanController {
     public Optional<CoursePlan> getCoursePlanById(@PathVariable Long planId) {
         return coursePlanRepository.findById(planId);
     }
+
 
 }
