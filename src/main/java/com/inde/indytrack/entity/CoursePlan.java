@@ -17,20 +17,26 @@ public class CoursePlan {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long  id;
+
+    @ManyToOne
+    @JoinColumn(name = "student_id")
+    private Student student;
 
     @NotEmpty
-    @Column(name = "student_id")
-    private Long studentId;
+    private String semester;
 
-    @ElementCollection
-    @CollectionTable(name = "course_plan_semesters", joinColumns = @JoinColumn(name = "course_plan_id"))
-    @MapKeyColumn(name = "course_code")
-    @Column(name = "semester")
-    private Map<String, String> courseSemesterMap = new HashMap<>();
+    @ManyToMany
+    @JoinTable(
+            name = "course_plan_courses",
+            joinColumns = @JoinColumn(name = "course_plan_id"),
+            inverseJoinColumns = @JoinColumn(name = "course_code")
+    )
 
-    public CoursePlan(Long studentId, String semester, Set<Course> courses){
-        this.studentId = studentId;
+    private Set<Course> courses;
+
+    public CoursePlan(Student student, String semester, Set<Course> courses){
+        this.student = student;
         this.semester = semester;
         this.courses = courses;
     }
