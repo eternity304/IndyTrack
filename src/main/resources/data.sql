@@ -35,3 +35,4 @@ VALUES
 
 -- Insert comments
 INSERT INTO comments (studentId, courseId, time, body) VALUES (5555, 'GOT123', '1523', 'A comment');
+INSERT INTO comments (studentId, courseId, time, body) VALUES (4444, 'GOT456', '1525', 'A bad comment');

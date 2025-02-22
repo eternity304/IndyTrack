@@ -11,7 +11,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.CascadeType;
-import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "students")
@@ -23,6 +23,5 @@ public class Student extends User {
 
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     @Nullable
-    private ArrayList<CoursePlan> coursePlans = new ArrayList<>();
-
+    private List<CoursePlan> coursePlans;
 }
