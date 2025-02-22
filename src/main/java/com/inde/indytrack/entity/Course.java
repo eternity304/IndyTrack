@@ -30,12 +30,6 @@ public class Course {
     @Column(name = "description", length = 500)
     private String description;
 
-//    @Nullable
-//    private List<String> comments = new ArrayList<>();
-
-//    @Nullable
-//    private Course prequisite;
-
     public Course(
             String code,
             String name,
