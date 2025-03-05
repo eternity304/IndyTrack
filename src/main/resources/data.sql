@@ -36,3 +36,17 @@ VALUES
 -- Insert comments
 INSERT INTO comments (studentId, courseId, time, body) VALUES (5555, 'GOT123', '1523', 'A comment');
 INSERT INTO comments (studentId, courseId, time, body) VALUES (4444, 'GOT456', '1525', 'A bad comment');
+
+-- Insert coursePlan
+INSERT INTO coursePlans (studentId) 
+VALUES (1111);
+
+-- Insert semesters into coursePlan
+INSERT INTO semesters (id, semester, coursePlanId) 
+VALUES (10, 'Fall 2024', 1), (11, 'Winter 2025', 1);
+
+-- Insert courses into corresponding semester
+INSERT INTO semesterCoursesList (semesterId, courseId) 
+VALUES 
+    (10, 'GOT123'),  -- Fall 2024 courses
+    (11, 'GOT456');  -- Winter 2025 courses
