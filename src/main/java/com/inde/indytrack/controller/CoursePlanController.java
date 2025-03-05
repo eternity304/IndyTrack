@@ -12,6 +12,8 @@ import com.inde.indytrack.repository.StudentRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 import java.lang.StackWalker.Option;
 import java.util.List;
@@ -62,17 +64,17 @@ public class CoursePlanController {
         return "Course plan deleted successfully";
     }
 
-    @PutMapping("/{planId}/semester/{semester}/add_course/{courseId}")
+    @PutMapping("/{planId}/{semester}/{courseId}")
     public CoursePlan addCourse(
         @PathVariable Long planId,
         @PathVariable String semester,
         @PathVariable String courseId
     ) {
         CoursePlan coursePlan = coursePlanRepository.findById(planId)
-            .orElseThrow(() -> new RuntimeException("Course Plan not found"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course Plan not found"));
         
         Optional<SemesterCourses> optionalSemesterCourses = coursePlan.getSemesterCoursesList().stream()
-            .filter(sc -> sc.getSemester().toLowerCase().equals(semester.toLowerCase()))
+            .filter(sc -> sc.getSemester().trim().toLowerCase().equals(semester.trim().toLowerCase()))
             .findFirst();
         
         SemesterCourses semesterCourses;
@@ -93,19 +95,54 @@ public class CoursePlanController {
         return coursePlanRepository.save(coursePlan);
     }
 
-    // @PutMapping("/{planId}/remove-course/{courseCode}")
-    // public CoursePlan removeCourse(@PathVariable Long planId, @PathVariable String courseCode) {
-    //     CoursePlan coursePlan = coursePlanRepository.findById(planId)
-    //             .orElseThrow(() -> new RuntimeException("Course Plan not found"));
+    @DeleteMapping("/{planId}/{semester}/{courseCode}")
+    public CoursePlan removeCourseFromSemester(
+            @PathVariable Long planId,
+            @PathVariable String semester,
+            @PathVariable String courseCode
+    ) {
 
-    //     Course course = courseRepository.findById(courseCode)
-    //             .orElseThrow(() -> new RuntimeException("Course not found"));
+        // Fetch the course plan or return error for not found
+        CoursePlan coursePlan = coursePlanRepository.findById(planId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course Plan not found"));
 
-    //     coursePlan.getCourseSemesterMap().remove(courseCode);
-    //     return coursePlanRepository.save(coursePlan);
-    // }
+        // Find the semester in the course plan or throw exception
+        SemesterCourses semesterCourses = coursePlan.getSemesterCoursesList().stream()
+                .filter(sc -> sc.getSemester().toLowerCase().equals(semester.trim().toLowerCase()))
+                .findFirst()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Semester not found"));
 
-    
+        // Remove the course if it exists
+        if (!semesterCourses.getCourses().remove(courseCode)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found in the semester");
+        }
 
+        // If the semester has no more courses, remove it completely (Optional)
+        if (semesterCourses.getCourses().isEmpty()) {
+            coursePlan.getSemesterCoursesList().remove(semesterCourses);
+        }
+
+        return coursePlanRepository.save(coursePlan);
+    }
+
+    @DeleteMapping("/{planId}/{semester}")
+    public CoursePlan removeSemester(
+            @PathVariable Long planId,
+            @PathVariable String semester
+    ) {
+
+        // Fetch the course plan or throw an exception
+        CoursePlan coursePlan = coursePlanRepository.findById(planId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course Plan not found"));
+
+        // Find and remove the course from the courseplan
+        boolean removed = coursePlan.getSemesterCoursesList().removeIf(sc -> sc.getSemester().trim().toLowerCase().equals(semester.trim().toLowerCase()));
+
+        if (!removed) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Semester not found");
+        }
+
+        return coursePlanRepository.save(coursePlan);
+    }
 
 }
