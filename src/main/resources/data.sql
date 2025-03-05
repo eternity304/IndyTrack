@@ -25,13 +25,31 @@ VALUES
 
 INSERT INTO admins (id) VALUES (6666);
 
--- Insert courses
-
+-- Insert courses without preq
 INSERT INTO courses (code, name, description)
 VALUES
 ('GOT123', 'A Game of Thrones', 'AAA'),
 ('GOT456', 'A Clash of Kings', 'BBB'),
-('GOT789', 'A Storm of Swords', 'CCC');
+('GOT789', 'A Storm of Swords', 'CCC'),
+('MAT257', 'Analysis II', 'Topology of R^n; compactness, functions and continuity, extreme value theorem. Derivatives; 
+inverse and implicit function theorems, maxima and minima, Lagrange multipliers. Integration; Fubini''s theorem, partitions of unity, 
+change of variables. Differential forms. Manifolds in R^n; integration on manifolds; Stokes'' 
+theorem for differential forms and classical versions. Some topics may vary year-to-year.');
+
+-- Insert courses with preq and its prequisites
+INSERT INTO courses (code, name, description)
+VALUES
+('MAT347', 'Groups, Rings, and Fields', 'Groups, subgroups, quotient groups, Sylow theorems, 
+Jordan-Hölder theorem, finitely generated abelian groups, solvable groups. Rings, ideals, Chinese
+ remainder theorem; Euclidean domains and principal ideal domains: unique factorization. Noetherian rings, 
+ Hilbert basis theorem. Finitely generated modules. Field extensions, algebraic closure, straight-edge and 
+ compass constructions. Galois theory, including insolvability of the quintic.');
+
+INSERT INTO coursePrerequisites(courseId, prerequisitesId)
+VALUES
+('MAT347', 'MAT257'),
+('MAT347', 'GOT123');
+
 
 -- Insert comments
 INSERT INTO comments (studentId, courseId, time, body) VALUES (5555, 'GOT123', '1523', 'A comment');
