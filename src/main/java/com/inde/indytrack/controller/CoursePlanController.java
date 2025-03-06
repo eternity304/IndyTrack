@@ -4,7 +4,6 @@ import com.inde.indytrack.dto.CoursePlanDTO;
 import com.inde.indytrack.entity.Course;
 import com.inde.indytrack.entity.CoursePlan;
 import com.inde.indytrack.entity.Student;
-import com.inde.indytrack.exception.CourseNotFoundException;
 import com.inde.indytrack.entity.SemesterCourses;
 import com.inde.indytrack.repository.CoursePlanRepository;
 import com.inde.indytrack.repository.CourseRepository;
@@ -15,9 +14,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
 
-import java.lang.StackWalker.Option;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.ArrayList;
 
 @CrossOrigin
@@ -41,18 +40,24 @@ public class CoursePlanController {
 
     @GetMapping("/student/{studentId}")
     public List<CoursePlan> getCoursePlansByStudent(@PathVariable Long studentId) {
+        if (!studentRepository.existsById(studentId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No student with student ID " + studentId + " has been found");
+        }
         return coursePlanRepository.findByStudentId(studentId);
     }
 
     @GetMapping("/{planId}")
     public Optional<CoursePlan> getCoursePlanById(@PathVariable Long planId) {
+        if (!coursePlanRepository.existsById(planId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Course plan with ID " + planId + " was not found");
+        }
         return coursePlanRepository.findById(planId);
     }
 
     @PostMapping
     public CoursePlan createCoursePlan(@RequestBody CoursePlanDTO coursePlanDTO) {
         Student student = studentRepository.findById(coursePlanDTO.getStudentId())
-                .orElseThrow(() -> new RuntimeException("Student not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Student with ID " + coursePlanDTO.getStudentId() + " was not found"));
 
         CoursePlan coursePlan = new CoursePlan(student, coursePlanDTO.getSemesterCourses());
         return coursePlanRepository.save(coursePlan);
@@ -60,8 +65,112 @@ public class CoursePlanController {
 
     @DeleteMapping("/{planId}")
     public String deleteCoursePlan(@PathVariable Long planId) {
+        if (!coursePlanRepository.existsById(planId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Course Plan with ID " + planId + " does not exist");
+        }
         coursePlanRepository.deleteById(planId);
-        return "Course plan deleted successfully";
+        return "Course plan with ID " + planId + " deleted successfully";
+    }
+
+    private boolean checkSemester(String semester) {
+        String[] parts = semester.split(" ");
+
+        // Check if entry is correct
+        if (parts.length != 2) { return false; }
+
+        String term = parts[0].trim().toLowerCase();
+        int year;
+
+        // Check if year has valid value
+        try {
+            year = Integer.parseInt(parts[1].trim());
+        } catch (NumberFormatException e) {
+            return false;
+        }
+
+        // Check if year is within valid range
+        if (!(year >= 2018 && year <= 2030)) {
+            return false;
+        }
+
+        switch (term) {
+            case "winter": return true;
+            case "summer": return true;
+            case "fall": return true;
+            default: return false;
+        }
+
+    }
+
+    private int getSemesterOrder(String semester) {
+        /*
+        Converts a semester string (e.g., "Fall 2020") into a comparable integer.
+        Winter -> 1, Summer -> 2, Fall -> 3.
+         */
+        String[] parts = semester.split(" ");
+        if (parts.length != 2) { throw new IllegalArgumentException("Invalid semester format: " + semester); }
+
+        String term = parts[0].trim().toLowerCase();
+        int year;
+        try { 
+            year = Integer.parseInt(parts[1].trim());
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid year in semester format: " + semester);
+        }
+
+        int termOrder;
+        switch (term.toLowerCase()) {
+            case "winter": termOrder = 1; break;
+            case "summer": termOrder = 2; break;
+            case "fall": termOrder = 3; break;
+            default: throw new IllegalArgumentException("Unknown semester term: " + term);
+        }
+
+        return year * 10 + termOrder;
+    }
+
+    private boolean isCourseCompletedInPreviousSemesters(Course prerequisite, List<SemesterCourses> semesters, int currentSemesterOrder) {
+        /**
+        Checks if a prerequisite course was completed in any semester before the current one.
+        */
+        for (SemesterCourses sc : semesters) {
+            if (getSemesterOrder(sc.getSemester()) < currentSemesterOrder && sc.getCourses().contains(prerequisite.getCode())) {
+                return true;  
+            }
+        }
+
+        for (Course prereqPrerequisite : prerequisite.getPrerequisites()) {
+            if (!isCourseCompletedInPreviousSemesters(prereqPrerequisite, semesters, currentSemesterOrder)) {
+                return false;
+            }
+        }
+
+        return false;
+    }
+    @PutMapping("/{planId}/{semester}")
+    public CoursePlan addSemester(
+        @PathVariable Long planId,
+        @PathVariable String semester
+    ) {
+        if (!checkSemester(semester)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Semester " + semester + " is invalid");
+        }
+
+        CoursePlan coursePlan = coursePlanRepository.findById(planId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Did not find course plan")); 
+        
+        List<SemesterCourses> semesters = coursePlan.getSemesterCoursesList();
+
+        Optional<SemesterCourses> optionalSemesterCourses = semesters.stream()
+            .filter(sc -> sc.getSemester() == semester)
+            .findFirst();
+        
+        if (!optionalSemesterCourses.isPresent()) {
+            SemesterCourses semesterCourses = new SemesterCourses(semester, new ArrayList<>(), coursePlan);
+            coursePlan.getSemesterCoursesList().add(semesterCourses);
+        }
+
+        return coursePlanRepository.save(coursePlan);
     }
 
     @PutMapping("/{planId}/{semester}/{courseId}")
@@ -71,23 +180,39 @@ public class CoursePlanController {
         @PathVariable String courseId
     ) {
         CoursePlan coursePlan = coursePlanRepository.findById(planId)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course Plan not found"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Did not find course plan"));
         
-        Optional<SemesterCourses> optionalSemesterCourses = coursePlan.getSemesterCoursesList().stream()
-            .filter(sc -> sc.getSemester().trim().toLowerCase().equals(semester.trim().toLowerCase()))
+        Course course = courseRepository.findById(courseId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Did not course: " + courseId));
+        
+        int currentSemesterOrder = getSemesterOrder(semester);
+
+        List<SemesterCourses> semesters = coursePlan.getSemesterCoursesList();
+        
+        Optional<SemesterCourses> optionalSemesterCourses = semesters.stream()
+            .filter(sc -> getSemesterOrder(sc.getSemester()) == currentSemesterOrder)
             .findFirst();
         
-        SemesterCourses semesterCourses;
-        // update if semester course is present else create the corresponding semester so that
-        // the course can be added in
-        if (optionalSemesterCourses.isPresent()) {
-            semesterCourses = optionalSemesterCourses.get();
-        } else {
-            semesterCourses = new SemesterCourses(semester, new ArrayList<>(), coursePlan);
-            coursePlan.getSemesterCoursesList().add(semesterCourses);
+        if (!optionalSemesterCourses.isPresent()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Did not find semester " + semester + " in course plan");
         }
 
-        // Add the course if it is not already in the list
+        SemesterCourses semesterCourses = optionalSemesterCourses.get();
+    
+        // Check prereq
+        Set<Course> prerequisites = course.getPrerequisites();
+        List<String> missingPrerequisites = new ArrayList<>();
+
+        for (Course prerequisite : prerequisites) {
+            if (!isCourseCompletedInPreviousSemesters(prerequisite, semesters, currentSemesterOrder)) {
+                missingPrerequisites.add(prerequisite.getCode());
+            }
+        }
+
+        if (!missingPrerequisites.isEmpty()) {
+            System.err.println("Course " + courseId + " has missing prerequisite(s): " + missingPrerequisites);
+        }
+        
         if (!semesterCourses.getCourses().contains(courseId)) {
             semesterCourses.getCourses().add(courseId);
         }
