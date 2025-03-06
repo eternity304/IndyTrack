@@ -108,14 +108,14 @@ public class CoursePlanController {
         Winter -> 1, Summer -> 2, Fall -> 3.
          */
         String[] parts = semester.split(" ");
-        if (parts.length != 2) { throw new IllegalArgumentException("Invalid semester format: " + semester); }
+        if (parts.length != 2) { throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid Semester Format " + semester); }
 
         String term = parts[0].trim().toLowerCase();
         int year;
         try { 
             year = Integer.parseInt(parts[1].trim());
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Invalid year in semester format: " + semester);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid year in semester format: " + semester);
         }
 
         int termOrder;
@@ -123,7 +123,7 @@ public class CoursePlanController {
             case "winter": termOrder = 1; break;
             case "summer": termOrder = 2; break;
             case "fall": termOrder = 3; break;
-            default: throw new IllegalArgumentException("Unknown semester term: " + term);
+            default: throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown semester term: " + term);
         }
 
         return year * 10 + termOrder;
@@ -157,7 +157,7 @@ public class CoursePlanController {
         }
 
         CoursePlan coursePlan = coursePlanRepository.findById(planId)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Did not find course plan")); 
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Did not find course plan with ID " + planId)); 
         
         List<SemesterCourses> semesters = coursePlan.getSemesterCoursesList();
 
@@ -180,10 +180,10 @@ public class CoursePlanController {
         @PathVariable String courseId
     ) {
         CoursePlan coursePlan = coursePlanRepository.findById(planId)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Did not find course plan"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Did not find course plan with ID " +  planId));
         
         Course course = courseRepository.findById(courseId)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Did not course: " + courseId));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Did not find course with ID " + courseId));
         
         int currentSemesterOrder = getSemesterOrder(semester);
 
@@ -229,17 +229,17 @@ public class CoursePlanController {
 
         // Fetch the course plan or return error for not found
         CoursePlan coursePlan = coursePlanRepository.findById(planId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course Plan not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Did not find course plan with ID " + planId));
 
         // Find the semester in the course plan or throw exception
         SemesterCourses semesterCourses = coursePlan.getSemesterCoursesList().stream()
                 .filter(sc -> sc.getSemester().toLowerCase().equals(semester.trim().toLowerCase()))
                 .findFirst()
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Semester not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Did not found semester " + semester + " in course plan with ID " + planId));
 
         // Remove the course if it exists
         if (!semesterCourses.getCourses().remove(courseCode)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found in the semester");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Did not find course " + courseCode + " in semester " + semester);
         }
 
         // If the semester has no more courses, remove it completely (Optional)
