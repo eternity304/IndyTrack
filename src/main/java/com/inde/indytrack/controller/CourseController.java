@@ -7,8 +7,13 @@ import com.inde.indytrack.repository.CourseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 @CrossOrigin
 @RestController
@@ -22,14 +27,32 @@ public class CourseController {
 
     @GetMapping("/courses")
     List<Course> retrieveAllCourses() {
-        return repository.findAll();
+        return this.repository.findAll();
+    }
+
+    // Helper function for collecting prerequisite
+    private Set<Course> getPrerequisitesCourses(Set<String> prerequisistesCodes) {
+        if (prerequisistesCodes == null || prerequisistesCodes.isEmpty()) {
+            return new HashSet<>();
+        } else {
+            return prerequisistesCodes.stream() // convert Set<Course> into Stream<Course> which is a way of processing data from sources that allows functional operations
+                        .map(this.repository::findById) // it retrieve the course object  from the course repository by searchig its id
+                        .filter(Optional::isPresent) // returns optional<course> which is a wrapper class for handling the case in which there is no Course object; this prevent null pointer exceptionn and returns an object
+                        .map(Optional::get) // Optional::isPresent filters out empty optional<course> and optional:: get return non-empty ones
+                        .collect(Collectors.toSet());
+        }
     }
 
     @PostMapping("/courses")
     Course createCourse(@RequestBody CourseDTO courseDto) {
         Course newCourse = new Course();
+        Set<Course> prerequisites = getPrerequisitesCourses(courseDto.getPrerequisitesCodes());
+        
         newCourse.setName(courseDto.getName());
         newCourse.setCode(courseDto.getCode());
+        newCourse.setDescription(courseDto.getDescription());
+        newCourse.setPrerequisites(prerequisites);
+        
         return repository.save(newCourse);
     }
 
@@ -44,15 +67,18 @@ public class CourseController {
         return repository.findById(courseCode)
                 .map(course -> {
                     course.setName(courseDto.getName());
-//                    course.setCode(courseDto.getCode());
                     course.setDescription((courseDto.getDescription()));
+                    Set<Course> prerequisistes = getPrerequisitesCourses(courseDto.getPrerequisitesCodes());
+                    course.setPrerequisites(prerequisistes);
                     return repository.save(course);
                 })
                 .orElseGet(() -> {
                     Course newCourse = new Course();
+                    Set<Course> prerequisites = getPrerequisitesCourses(courseDto.getPrerequisitesCodes());
                     newCourse.setCode(courseCode);
                     newCourse.setName(courseDto.getName());
                     newCourse.setDescription(courseDto.getDescription());
+                    newCourse.setPrerequisites(prerequisites);
                     return repository.save(newCourse);
                 });
     }

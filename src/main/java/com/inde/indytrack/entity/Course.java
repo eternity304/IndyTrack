@@ -26,7 +26,7 @@ public class Course {
     private String name;
 
     @NotEmpty
-    @Column(name = "description", length = 500)
+    @Column(name = "description", length = 2000)
     private String description;
 
     @ManyToMany
