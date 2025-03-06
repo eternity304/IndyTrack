@@ -6,6 +6,8 @@ import lombok.Setter;
 
 import org.springframework.lang.Nullable;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.PrimaryKeyJoinColumn;
@@ -22,6 +24,7 @@ import java.util.List;
 public class Student extends User {
 
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     @Nullable
     private List<CoursePlan> coursePlans;
 }
