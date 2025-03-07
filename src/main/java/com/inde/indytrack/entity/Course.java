@@ -4,10 +4,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
-import java.util.ArrayList;
-import java.util.List;
+
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
 @Entity
 @NoArgsConstructor
@@ -24,13 +27,28 @@ public class Course {
     private String name;
 
     @NotEmpty
-    @Column(name = "description", length = 500)
+    @Column(name = "description", length = 2000)
     private String description;
 
-    public Course(String code, String name, String description) {
+    @ManyToMany
+    @JoinTable(
+        name = "coursePrerequisites",
+        joinColumns = @JoinColumn(name = "courseId"),
+        inverseJoinColumns = @JoinColumn(name = "prerequisitesId")
+    )
+    private Set<Course> prerequisites = new HashSet<>();  
+  
+
+    public Course(
+            String code,
+            String name,
+            Optional<String> description,
+            Set<Course> prerequisites)
+    {
         this.code = code;
         this.name = name;
-        this.description = description;
+        this.description = description.orElse(null);
+        this.prerequisites = prerequisites != null ? prerequisites : new HashSet<>();
     }
 
 }

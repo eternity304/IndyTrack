@@ -5,15 +5,15 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
-
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @Entity
 @NoArgsConstructor
 @Getter
 @Setter
-@Table(name = "course_plans")
+@Table(name = "coursePlans")
 public class CoursePlan {
 
     @Id
@@ -21,22 +21,22 @@ public class CoursePlan {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "student_id", nullable = false)
+    @JoinColumn(name = "studentId", nullable = false)
     private Student student;
     
-    @ElementCollection
-    @CollectionTable(name = "course_plan_semesters", joinColumns = @JoinColumn(name = "course_plan_id"))
-    @MapKeyColumn(name = "course_code")
-    @Column(name = "semester")
-    private Map<String, String> courseSemesterMap = new HashMap<>();
+    @OneToMany(mappedBy = "coursePlan", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SemesterCourses> semesterCoursesList = new ArrayList<>();
 
-    public CoursePlan(Student student, Map<String, String> courseSemesterMap){
+    public CoursePlan(Student student, Map<String, List<String>> semesterCourses) {
         this.student = student;
-        this.courseSemesterMap = courseSemesterMap != null ? courseSemesterMap : new HashMap<>();
+
+        if (semesterCourses != null) {
+            for (Map.Entry<String, List<String>> entry : semesterCourses.entrySet()) {
+                SemesterCourses semesterCoursesEntity = new SemesterCourses(entry.getKey(), entry.getValue(), this);
+                semesterCoursesList.add(semesterCoursesEntity);
+            }
+        }
     }
 
-    public void updateCourseSemester(String courseCode, String semester) {
-        this.courseSemesterMap.put(courseCode, semester);
-    }
 
 }

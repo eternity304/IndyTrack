@@ -11,6 +11,9 @@ import javax.persistence.Table;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.CascadeType;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.List;
 
 @Entity
@@ -22,6 +25,7 @@ import java.util.List;
 public class Student extends User {
 
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     @Nullable
     private List<CoursePlan> coursePlans;
 }
