@@ -1,8 +1,8 @@
 package com.inde.indytrack.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import javax.persistence.PrimaryKeyJoinColumn;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
