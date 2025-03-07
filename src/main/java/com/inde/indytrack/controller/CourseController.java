@@ -30,6 +30,7 @@ public class CourseController {
         Course newCourse = new Course();
         newCourse.setName(courseDto.getName());
         newCourse.setCode(courseDto.getCode());
+        newCourse.setDescription(courseDto.getDescription());
         return repository.save(newCourse);
     }
 
@@ -44,7 +45,7 @@ public class CourseController {
         return repository.findById(courseCode)
                 .map(course -> {
                     course.setName(courseDto.getName());
-//                    course.setCode(courseDto.getCode());
+                    course.setCode(courseDto.getCode());
                     course.setDescription((courseDto.getDescription()));
                     return repository.save(course);
                 })
