@@ -4,8 +4,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotEmpty;
+
+import javax.persistence.*;
+import javax.validation.constraints.NotEmpty;
 
 import java.util.HashSet;
 import java.util.Optional;

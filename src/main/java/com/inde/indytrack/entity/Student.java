@@ -6,13 +6,14 @@ import lombok.Setter;
 
 import org.springframework.lang.Nullable;
 
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.OneToMany;
+import javax.persistence.CascadeType;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.PrimaryKeyJoinColumn;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.CascadeType;
 import java.util.List;
 
 @Entity
