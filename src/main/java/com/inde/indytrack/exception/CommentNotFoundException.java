@@ -1,5 +1,7 @@
 package com.inde.indytrack.exception;
 
 public class CommentNotFoundException extends RuntimeException {
-    public CommentNotFoundException(String code) {super("Could not find courseId " +  code); }
+    public CommentNotFoundException(Long commentId) {
+        super("Could not find comment with ID " + commentId);
+    }
 }

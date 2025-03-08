@@ -12,7 +12,10 @@ import com.inde.indytrack.repository.CommentRepository;
 import com.inde.indytrack.repository.CourseRepository;
 import com.inde.indytrack.repository.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.time.LocalDateTime;
 
 import com.inde.indytrack.entity.Comment;
@@ -55,7 +58,7 @@ public class CommentController {
     List<Comment> retrieveCommentsByCourseCode(@PathVariable("code") String courseCode) {
         List<Comment> comments = this.commentRepository.findCommentByCourseId(courseCode);
         if (comments.isEmpty()) {
-            throw new CommentNotFoundException(courseCode);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No comments found for course with code " + courseCode);
         }
         return comments;
     }
@@ -82,6 +85,15 @@ public class CommentController {
         } else {
             throw new RuntimeException("Could not create comment: invalid student or course Id.");
         }
-
     }
+
+    @DeleteMapping("/{id}")
+    String deleteComment(@PathVariable("id") Long commentId) {
+        if (!commentRepository.existsById(commentId)) {
+            throw new CommentNotFoundException(commentId);
+        }
+        commentRepository.deleteById(commentId);
+        return "Comment " + commentId + " has been deleted successfully";
+    }
+
 }

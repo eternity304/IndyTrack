@@ -35,6 +35,9 @@ public class StudentController {
 
     @PostMapping
     Student createStudent(@RequestBody RegisterDTO newStudent) {
+        if (repository.findByEmail(newStudent.getEmail()) != null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email is already in use");
+        }
         Student student = new Student();
         student.setFirstName(newStudent.getFirstName());
         student.setLastName(newStudent.getLastName());
