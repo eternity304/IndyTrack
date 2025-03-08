@@ -1,6 +1,8 @@
 package com.inde.indytrack.controller;
 
 import com.inde.indytrack.exception.CommentNotFoundException;
+import com.inde.indytrack.exception.CourseNotFoundException;
+import com.inde.indytrack.exception.StudentNotFoundException;
 import com.inde.indytrack.entity.Comment;
 import com.inde.indytrack.entity.CommentKey;
 import com.inde.indytrack.entity.Course;
@@ -44,12 +46,12 @@ public class CommentController {
     }
 
     @GetMapping("/comments")
-    List<Comment> retrieveAllComment() {
+    List<Comment> retrieveAllComments() {
         return this.commentRepository.findAll();
     }
 
     @GetMapping("/comments/{code}")
-    List<Comment> retrieveCourse(@PathVariable("code") String courseCode) {
+    List<Comment> retrieveCommentsByCourseCode(@PathVariable("code") String courseCode) {
         List<Comment> comments = this.commentRepository.findCommentByCourseId(courseCode);
         if (comments.isEmpty()) {
             throw new CommentNotFoundException(courseCode);
@@ -59,19 +61,19 @@ public class CommentController {
 
     @PostMapping("/comments/post")
     Comment createCourse(@RequestBody CommentDTO commentDto) {
-        List<Student> student = this.studentRepository.findStudentById(commentDto.getStudentId());
-        List<Course> course = this.courseRepository.findCourseById(commentDto.getCourseId());
+        Student student = this.studentRepository.findById(commentDto.getStudentId()).orElseThrow(() -> new StudentNotFoundException(commentDto.getStudentId()));
+        Course course = this.courseRepository.findById(commentDto.getCourseId()).orElseThrow(() -> new CourseNotFoundException(commentDto.getCourseId()));
 
-        if (!student.isEmpty() && !course.isEmpty() && !commentDto.getBody().isEmpty()) {
+        if (student != null && course != null && !commentDto.getBody().isEmpty()) {
             Comment newComment = new Comment();
             CommentKey key = new CommentKey();
 
-            key.setStudentId(student.get(0).getId());
-            key.setCourseId(course.get(0).getCode());
+            key.setStudentId(student.getId());
+            key.setCourseId(course.getCode());
             key.setTime(LocalDateTime.now().toString());
             newComment.setCommentId(key);
-            newComment.setCourse(course.get(0));
-            newComment.setStudent(student.get(0));
+            newComment.setCourse(course);
+            newComment.setStudent(student);
             newComment.setTime(LocalDateTime.now().toString());
             newComment.setBody(commentDto.getBody());
 
