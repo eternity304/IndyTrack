@@ -25,6 +25,7 @@ import java.util.List;
 
 @CrossOrigin
 @RestController
+@RequestMapping("/comments")
 public class CommentController {
 
     @Autowired
@@ -45,12 +46,12 @@ public class CommentController {
 
     }
 
-    @GetMapping("/comments")
+    @GetMapping
     List<Comment> retrieveAllComments() {
         return this.commentRepository.findAll();
     }
 
-    @GetMapping("/comments/{code}")
+    @GetMapping("/{code}")
     List<Comment> retrieveCommentsByCourseCode(@PathVariable("code") String courseCode) {
         List<Comment> comments = this.commentRepository.findCommentByCourseId(courseCode);
         if (comments.isEmpty()) {
@@ -59,7 +60,7 @@ public class CommentController {
         return comments;
     }
 
-    @PostMapping("/comments/post")
+    @PostMapping("/post")
     Comment createCourse(@RequestBody CommentDTO commentDto) {
         Student student = this.studentRepository.findById(commentDto.getStudentId()).orElseThrow(() -> new StudentNotFoundException(commentDto.getStudentId()));
         Course course = this.courseRepository.findById(commentDto.getCourseId()).orElseThrow(() -> new CourseNotFoundException(commentDto.getCourseId()));
@@ -81,5 +82,6 @@ public class CommentController {
         } else {
             throw new RuntimeException("Could not create comment: invalid student or course Id.");
         }
+
     }
 }

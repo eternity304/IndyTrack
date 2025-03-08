@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 @CrossOrigin
 @RestController
+@RequestMapping("/courses")
 public class CourseController {
     @Autowired
     private final CourseRepository repository;
@@ -25,7 +26,7 @@ public class CourseController {
         this.repository = repository;
     }
 
-    @GetMapping("/courses")
+    @GetMapping
     List<Course> retrieveAllCourses() {
         return this.repository.findAll();
     }
@@ -43,7 +44,7 @@ public class CourseController {
         }
     }
 
-    @PostMapping("/courses")
+    @PostMapping
     Course createCourse(@RequestBody CourseDTO courseDto) {
         Course newCourse = new Course();
         Set<Course> prerequisites = getPrerequisitesCourses(courseDto.getPrerequisitesCodes());
@@ -56,13 +57,13 @@ public class CourseController {
         return repository.save(newCourse);
     }
 
-    @GetMapping("/courses/{code}")
+    @GetMapping("/{code}")
     Course retrieveCourse(@PathVariable("code") String courseCode) {
         return repository.findById(courseCode)
                 .orElseThrow(() -> new CourseNotFoundException(courseCode));
     }
 
-    @PutMapping("/courses/{code}")
+    @PutMapping("/{code}")
     Course updateCourse(@RequestBody CourseDTO courseDto, @PathVariable("code") String courseCode) {
         return repository.findById(courseCode)
                 .map(course -> {
@@ -83,7 +84,7 @@ public class CourseController {
                 });
     }
 
-    @DeleteMapping("/courses/{code}")
+    @DeleteMapping("/{code}")
     String deleteCourse(@PathVariable("code") String courseCode) {
         if (!repository.existsById(courseCode)) {
             throw new CourseNotFoundException(courseCode);
