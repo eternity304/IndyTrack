@@ -1,12 +1,9 @@
 package com.inde.indytrack.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -14,18 +11,13 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import com.inde.indytrack.entity.Admin;
 import com.inde.indytrack.entity.Student;
 import com.inde.indytrack.entity.User;
-import com.inde.indytrack.entity.VerificationToken;
 import com.inde.indytrack.repository.StudentRepository;
 import com.inde.indytrack.repository.UserRepository;
 import com.inde.indytrack.repository.AdminRepository;
-import com.inde.indytrack.repository.VerificationTokenRepository;
-import com.inde.indytrack.service.EmailService;
 import com.inde.indytrack.dto.LoginDTO;
-import com.inde.indytrack.dto.UserDTO;
+import com.inde.indytrack.dto.RegisterDTO;
 
 import lombok.RequiredArgsConstructor;
-
-import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -34,84 +26,66 @@ public class AuthController {
     private final UserRepository userRepository;
     private final StudentRepository studentRepository;
     private final AdminRepository adminRepository;
-    private final VerificationTokenRepository tokenRepository;
-    private final EmailService emailService;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody UserDTO userDto) {
-        if (userRepository.findByEmail(userDto.getEmail()).isPresent()) {
+    @PostMapping("/register/student")
+    public ResponseEntity<String> registerStudent(@RequestBody RegisterDTO newStudent) {
+        if (studentRepository.findByEmail(newStudent.getEmail()) != null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email is already in use");
         }
-        String hashedPassword = passwordEncoder.encode(userDto.getPassword());
-        
-        User user;
-        if (userDto.getRole().equalsIgnoreCase("student")) {
-            user = new Student();
-        } else if (userDto.getRole().equalsIgnoreCase("admin")) {
-            user = new Admin();
-        } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid user type");
-        }
+        // TODO: Hash password
+        // String hashedPassword = passwordEncoder.encode(newStudent.getPassword());
 
-        user.setFirstName(userDto.getFirstName());
-        user.setLastName(userDto.getLastName());
-        user.setEmail(userDto.getEmail());
-        user.setPassword(hashedPassword);
-        user.setVerified(false);
-
-        // Save the user
-        user = userRepository.save(user);
-        
-        // Generate a verification token
-        VerificationToken verificationToken= new VerificationToken(user);
-        tokenRepository.save(verificationToken);
-
-        // Send a verification email
-        emailService.sendVerificationEmail(user.getEmail(), verificationToken.getToken());
-
-        return ResponseEntity.ok("User has been registered successfully. Please verify your email.");
+        Student student = new Student();
+        student.setFirstName(newStudent.getFirstName());
+        student.setLastName(newStudent.getLastName());
+        student.setEmail(newStudent.getEmail());
+        student.setPassword(newStudent.getPassword());
+        studentRepository.save(student);
+        return ResponseEntity.ok("Student has been registered successfully.");
     }
 
-    @GetMapping("/verify-email")
-    public ResponseEntity<String> verifyEmail(@RequestParam("token") String token) {
-        Optional<VerificationToken> verificationTokenOptional = tokenRepository.findByToken(token);
-        if (verificationTokenOptional.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid verification token");
+    @PostMapping("/register/admin")
+    public ResponseEntity<String> registerAdmin(@RequestBody RegisterDTO newAdmin) {
+        if (adminRepository.findByEmail(newAdmin.getEmail()) != null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email is already in use");
         }
+        // TODO: Hash password
+        // String hashedPassword = passwordEncoder.encode(newAdmin.getPassword());
 
-        VerificationToken verificationToken = verificationTokenOptional.get();
-
-        if (verificationToken.isExpired()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Verification token has expired");
-        }
-
-        User user = verificationToken.getUser();
-        user.setVerified(true);
-        userRepository.save(user);
-
-        // Delete the verification token after its use
-        tokenRepository.delete(verificationToken);
-
-        return ResponseEntity.ok("Email has been verified successfully. You can now log in.");
+        Admin admin = new Admin();
+        admin.setFirstName(newAdmin.getFirstName());
+        admin.setLastName(newAdmin.getLastName());
+        admin.setEmail(newAdmin.getEmail());
+        admin.setPassword(newAdmin.getPassword());
+        adminRepository.save(admin);
+        return ResponseEntity.ok("Admin has been registered successfully.");
     }
-    @PostMapping("/login")
-    public User login(@RequestBody LoginDTO loginDto) {
-        Optional<User> userOptional = userRepository.findByEmail(loginDto.getEmail());
-        if (userOptional.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password");
+
+    @PostMapping("/login/student")
+    public Student studentLogin(@RequestBody LoginDTO loginDto) {
+        Student student = studentRepository.findByEmail(loginDto.getEmail());
+        if (student == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Student with email " + loginDto.getEmail() + " not found");
         }
 
-        User user = userOptional.get();
-        
-        if (!user.isVerified()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Account has not been verified yet. Please check your email inbox for verification.");
-        }
-
-        if (!passwordEncoder.matches(loginDto.getPassword(), user.getPassword())) {
+        if (!passwordEncoder.matches(loginDto.getPassword(), student.getPassword())) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password");
         }
-        return user;
+        return student;
+    }
+
+    @PostMapping("/login/admin")
+    public Admin adminLogin(@RequestBody LoginDTO loginDto) {
+        Admin admin = adminRepository.findByEmail(loginDto.getEmail());
+        if (admin == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Admin with email " + loginDto.getEmail() + " not found");
+        }
+
+        if (!passwordEncoder.matches(loginDto.getPassword(), admin.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password");
+        }
+        return admin;
     }
 
 }

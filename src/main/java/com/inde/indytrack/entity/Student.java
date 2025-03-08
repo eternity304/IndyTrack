@@ -7,8 +7,7 @@ import lombok.Setter;
 import org.springframework.lang.Nullable;
 
 import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.OneToMany;
 import javax.persistence.CascadeType;
 
@@ -17,8 +16,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.List;
 
 @Entity
-@Table(name = "students")
-@PrimaryKeyJoinColumn(name = "id")
+@DiscriminatorValue("student")
 @NoArgsConstructor
 @Getter
 @Setter

@@ -21,7 +21,7 @@ import java.util.ArrayList;
 
 @CrossOrigin
 @RestController
-@RequestMapping("/coursePlans")
+@RequestMapping("/course-plans")
 public class CoursePlanController {
 
     @Autowired
@@ -38,7 +38,7 @@ public class CoursePlanController {
         return coursePlanRepository.findAll();
     }
 
-    @GetMapping("/student/{studentId}")
+    @GetMapping("/students/{studentId}")
     public List<CoursePlan> getCoursePlansByStudent(@PathVariable Long studentId) {
         if (!studentRepository.existsById(studentId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No student with student ID " + studentId + " has been found");

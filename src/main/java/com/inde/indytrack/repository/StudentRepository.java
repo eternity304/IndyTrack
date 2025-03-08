@@ -12,11 +12,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface StudentRepository extends JpaRepository<Student, Long> {
     @Query(value = "select * from students s " +
-            "where lower(s.firstName) like lower(concat('%', :searchTerm, '%')) " +
-            "or lower(s.lastName) like lower(concat('%', :searchTerm, '%'))", nativeQuery = true)
-    List<Student> search(@Param("searchTerm") String searchTerm);
+            "where lower(s.firstName) like lower(concat('%', :name, '%')) " +
+            "or lower(s.lastName) like lower(concat('%', :name, '%'))", nativeQuery = true)
+    List<Student> findByFirstOrLastName(@Param("name") String name);
 
-    @Query(value = "select * from students s " +
-            "where s.id = :searchTerm", nativeQuery = true)
-    List<Student> findStudentById(@Param("searchTerm") Long searchTerm);
+    Student findByEmail(@Param("email") String email);
 }

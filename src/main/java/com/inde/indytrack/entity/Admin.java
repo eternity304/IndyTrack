@@ -1,15 +1,13 @@
 package com.inde.indytrack.entity;
 
 import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.DiscriminatorValue;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "admins")
-@PrimaryKeyJoinColumn(name = "id")
+@DiscriminatorValue("admin")
 @NoArgsConstructor
 @Getter
 @Setter
