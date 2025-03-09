@@ -33,8 +33,8 @@ public class Course {
     @ManyToMany
     @JoinTable(
         name = "coursePrerequisites",
-        joinColumns = @JoinColumn(name = "courseId"),
-        inverseJoinColumns = @JoinColumn(name = "prerequisitesId")
+        joinColumns = @JoinColumn(name = "courseCode"),
+        inverseJoinColumns = @JoinColumn(name = "prerequisitesCode")
     )
     private Set<Course> prerequisites = new HashSet<>();  
   

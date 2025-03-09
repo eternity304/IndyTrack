@@ -25,8 +25,8 @@ public class Comment {
     private Student student;
 
     @ManyToOne
-    @MapsId("courseId")
-    @JoinColumn(name = "courseId")
+    @MapsId("courseCode")
+    @JoinColumn(name = "courseCode")
     @JsonIgnoreProperties({"comments"})
     private Course course;
 

@@ -16,8 +16,8 @@ public class CommentKey implements Serializable {
     @Column(name = "studentId")
     Long studentId;
 
-    @Column(name = "courseId")
-    String courseId;
+    @Column(name = "courseCode")
+    String courseCode;
 
     @Column(name = "time")
     String time;
@@ -25,14 +25,14 @@ public class CommentKey implements Serializable {
     @Override
     public int hashCode() {
         String concatString = String.valueOf(studentId.hashCode())
-                + String.valueOf(courseId.hashCode())
+                + String.valueOf(courseCode.hashCode())
                 + String.valueOf(time.hashCode());
         return concatString.hashCode();
     }
 
-    public CommentKey(Long studentId, String courseId, String time) {
+    public CommentKey(Long studentId, String courseCode, String time) {
         this.studentId = studentId;
-        this.courseId = courseId;
+        this.courseCode = courseCode;
         this.time = time;
     }
 
@@ -46,6 +46,6 @@ public class CommentKey implements Serializable {
         if (!(o instanceof CommentKey))
             return false;
         CommentKey other = (CommentKey) o;
-        return studentId.equals(other.studentId) && courseId.equals(other.courseId) && time.equals(other.time);
+        return studentId.equals(other.studentId) && courseCode.equals(other.courseCode) && time.equals(other.time);
     }
 }

@@ -28,7 +28,7 @@ public class SemesterCourses {
 
     @ElementCollection
     @CollectionTable(name = "semesterCoursesList", joinColumns = @JoinColumn(name = "semesterId"))
-    @Column(name = "courseId")
+    @Column(name = "courseCode")
     private List<String> courses = new ArrayList<>();
 
     @JsonIgnore

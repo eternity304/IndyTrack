@@ -40,7 +40,6 @@ public class CommentController {
         this.commentRepository = commentRepository;
         this.courseRepository = courseRepository;
         this.studentRepository = studentRepository;
-
     }
 
     @GetMapping
@@ -67,7 +66,7 @@ public class CommentController {
             CommentKey key = new CommentKey();
 
             key.setStudentId(student.getId());
-            key.setCourseId(course.getCode());
+            key.setCourseCode(course.getCode());
             key.setTime(LocalDateTime.now().toString());
             newComment.setCommentId(key);
             newComment.setCourse(course);
@@ -79,15 +78,6 @@ public class CommentController {
         } else {
             throw new RuntimeException("Could not create comment: invalid student or course Id.");
         }
-    }
-
-    @DeleteMapping("/{id}")
-    String deleteComment(@PathVariable("id") Long commentId) {
-        if (!commentRepository.existsById(commentId)) {
-            throw new CommentNotFoundException(commentId);
-        }
-        commentRepository.deleteById(commentId);
-        return "Comment " + commentId + " has been deleted successfully";
     }
 
 }
