@@ -18,12 +18,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 
-import com.inde.indytrack.entity.Comment;
-import com.inde.indytrack.repository.CommentRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-
 import java.util.List;
 
 @CrossOrigin
@@ -56,7 +50,7 @@ public class CommentController {
 
     @GetMapping("/{code}")
     List<Comment> retrieveCommentsByCourseCode(@PathVariable("code") String courseCode) {
-        List<Comment> comments = this.commentRepository.findCommentByCourseId(courseCode);
+        List<Comment> comments = this.commentRepository.findCommentByCourseCode(courseCode);
         if (comments.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No comments found for course with code " + courseCode);
         }
@@ -66,7 +60,7 @@ public class CommentController {
     @PostMapping("/post")
     Comment createCourse(@RequestBody CommentDTO commentDto) {
         Student student = this.studentRepository.findById(commentDto.getStudentId()).orElseThrow(() -> new StudentNotFoundException(commentDto.getStudentId()));
-        Course course = this.courseRepository.findById(commentDto.getCourseId()).orElseThrow(() -> new CourseNotFoundException(commentDto.getCourseId()));
+        Course course = this.courseRepository.findById(commentDto.getCourseCode()).orElseThrow(() -> new CourseNotFoundException(commentDto.getCourseCode()));
 
         if (student != null && course != null && !commentDto.getBody().isEmpty()) {
             Comment newComment = new Comment();

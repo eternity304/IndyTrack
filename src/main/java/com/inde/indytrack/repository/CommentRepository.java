@@ -12,6 +12,9 @@ import com.inde.indytrack.entity.Comment;
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long> {
     @Query(value = "select * from comments c " +
-            "where lower(c.courseId) like lower(concat('%', :searchTerm, '%')) ", nativeQuery = true)
-    List<Comment> findCommentByCourseId(@Param("searchTerm") String searchTerm);
+            "where lower(c.courseCode) like lower(concat('%', :searchTerm, '%')) ", nativeQuery = true)
+    List<Comment> findCommentByCourseCode(@Param("searchTerm") String searchTerm);
+
+    List<Comment> findCommentByStudentId(@Param("searchTerm") Long studentId);
+
 }

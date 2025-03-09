@@ -10,9 +10,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import com.inde.indytrack.entity.Admin;
 import com.inde.indytrack.entity.Student;
-import com.inde.indytrack.entity.User;
 import com.inde.indytrack.repository.StudentRepository;
-import com.inde.indytrack.repository.UserRepository;
 import com.inde.indytrack.repository.AdminRepository;
 import com.inde.indytrack.dto.LoginDTO;
 import com.inde.indytrack.dto.RegisterDTO;
@@ -23,7 +21,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final UserRepository userRepository;
     private final StudentRepository studentRepository;
     private final AdminRepository adminRepository;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
