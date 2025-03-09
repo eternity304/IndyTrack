@@ -1,6 +1,7 @@
 package com.inde.indytrack.controller;
 
 import com.inde.indytrack.dto.RegisterDTO;
+import com.inde.indytrack.dto.StudentDTO;
 import com.inde.indytrack.entity.Student;
 import com.inde.indytrack.exception.StudentNotFoundException;
 import com.inde.indytrack.repository.StudentRepository;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @CrossOrigin
 @RestController
@@ -23,18 +25,22 @@ public class StudentController {
     }
 
     @GetMapping
-    List<Student> retrieveAllStudents() {
-        return repository.findAll();
+    List<StudentDTO> retrieveAllStudents() {
+        return repository.findAll()
+                .stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/{id}")
-    Student retrieveStudent(@PathVariable("id") Long studentId) {
-        return repository.findById(studentId)
+    StudentDTO retrieveStudent(@PathVariable("id") Long studentId) {
+        Student student = repository.findById(studentId)
                 .orElseThrow(() -> new StudentNotFoundException(studentId));
+        return convertToDTO(student);
     }
 
     @PostMapping
-    Student createStudent(@RequestBody RegisterDTO newStudent) {
+    StudentDTO createStudent(@RequestBody RegisterDTO newStudent) {
         if (repository.findByEmail(newStudent.getEmail()) != null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email is already in use");
         }
@@ -43,23 +49,23 @@ public class StudentController {
         student.setLastName(newStudent.getLastName());
         student.setEmail(newStudent.getEmail());
         student.setPassword(newStudent.getPassword());
-        return repository.save(student);
+
+        Student savedStudent = repository.save(student);
+        return convertToDTO(savedStudent);
     }
 
     @PutMapping("/{id}")
-    Student updateStudent(@RequestBody Student newStudent, @PathVariable("id") Long studentId) {
+    StudentDTO updateStudent(@RequestBody StudentDTO updatedStudent, @PathVariable("id") Long studentId) {
         return repository.findById(studentId)
                 .map(student -> {
-                    student.setFirstName(newStudent.getFirstName());
-                    student.setLastName(newStudent.getLastName());
-                    student.setEmail(newStudent.getEmail());
-                    student.setPassword(newStudent.getPassword());
-                    return repository.save(student);
+                    student.setFirstName(updatedStudent.getFirstName());
+                    student.setLastName(updatedStudent.getLastName());
+                    student.setEmail(updatedStudent.getEmail());
+                    student.setPassword(updatedStudent.getPassword());
+                    Student savedStudent = repository.save(student);
+                    return convertToDTO(savedStudent);
                 })
-                .orElseGet(() -> {
-                    newStudent.setId(studentId);
-                    return repository.save(newStudent);
-                });
+                .orElseThrow(() -> new StudentNotFoundException(studentId));
     }
 
     @DeleteMapping("/{id}")
@@ -72,7 +78,20 @@ public class StudentController {
     }
 
     @GetMapping("/search/{searchstring}")
-    List<Student> retrieveStudentByName(@PathVariable("searchstring") String searchString) {
-        return repository.findByFirstOrLastName(searchString);
+    List<StudentDTO> retrieveStudentByName(@PathVariable("searchstring") String searchString) {
+        return repository.findByFirstOrLastName(searchString)
+                .stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    private StudentDTO convertToDTO(Student student) {
+        StudentDTO dto = new StudentDTO();
+        dto.setId(student.getId());
+        dto.setFirstName(student.getFirstName());
+        dto.setLastName(student.getLastName());
+        dto.setEmail(student.getEmail());
+        dto.setPassword(student.getPassword());
+        return dto;
     }
 }
