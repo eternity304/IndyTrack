@@ -3,10 +3,10 @@ package com.inde.indytrack.controller;
 import com.inde.indytrack.exception.CommentNotFoundException;
 import com.inde.indytrack.exception.CourseNotFoundException;
 import com.inde.indytrack.exception.StudentNotFoundException;
-import com.inde.indytrack.entity.Comment;
-import com.inde.indytrack.entity.CommentKey;
-import com.inde.indytrack.entity.Course;
-import com.inde.indytrack.entity.Student;
+import com.inde.indytrack.model.Comment;
+import com.inde.indytrack.model.CommentKey;
+import com.inde.indytrack.model.Course;
+import com.inde.indytrack.model.Student;
 import com.inde.indytrack.dto.CommentDTO;
 import com.inde.indytrack.repository.CommentRepository;
 import com.inde.indytrack.repository.CourseRepository;
@@ -24,60 +24,90 @@ import java.util.List;
 @RestController
 @RequestMapping("/comments")
 public class CommentController {
-
     @Autowired
-    private final CommentRepository commentRepository;
+    private final CommentRepository repository;
+    
     @Autowired
     private final StudentRepository studentRepository;
+
     @Autowired
     private final CourseRepository courseRepository;
 
-    public CommentController(
-            CommentRepository commentRepository,
-            StudentRepository studentRepository,
-            CourseRepository courseRepository
-    ) {
-        this.commentRepository = commentRepository;
+    public CommentController(CommentRepository repository, StudentRepository studentRepository, CourseRepository courseRepository) {
+        this.repository = repository;
         this.courseRepository = courseRepository;
         this.studentRepository = studentRepository;
     }
 
     @GetMapping
     List<Comment> retrieveAllComments() {
-        return this.commentRepository.findAll();
+        return repository.findAll();
     }
 
-    @GetMapping("/{code}")
-    List<Comment> retrieveCommentsByCourseCode(@PathVariable("code") String courseCode) {
-        List<Comment> comments = this.commentRepository.findCommentByCourseCode(courseCode);
+    @GetMapping("/{courseCode}/oldest")
+    List<Comment> retrieveOldestCommentsByCourseCode(@PathVariable("courseCode") String courseCode) {
+        List<Comment> comments = repository.findByIdCourseCode(courseCode);
         if (comments.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No comments found for course with code " + courseCode);
+            throw new CommentNotFoundException(courseCode);
         }
         return comments;
     }
 
-    @PostMapping("/post")
-    Comment createCourse(@RequestBody CommentDTO commentDto) {
-        Student student = this.studentRepository.findById(commentDto.getStudentId()).orElseThrow(() -> new StudentNotFoundException(commentDto.getStudentId()));
-        Course course = this.courseRepository.findById(commentDto.getCourseCode()).orElseThrow(() -> new CourseNotFoundException(commentDto.getCourseCode()));
-
-        if (student != null && course != null && !commentDto.getBody().isEmpty()) {
-            Comment newComment = new Comment();
-            CommentKey key = new CommentKey();
-
-            key.setStudentId(student.getId());
-            key.setCourseCode(course.getCode());
-            key.setTime(LocalDateTime.now().toString());
-            newComment.setCommentId(key);
-            newComment.setCourse(course);
-            newComment.setStudent(student);
-            newComment.setTime(LocalDateTime.now().toString());
-            newComment.setBody(commentDto.getBody());
-
-            return this.commentRepository.save(newComment);
-        } else {
-            throw new RuntimeException("Could not create comment: invalid student or course Id.");
+    @GetMapping("/{courseCode}/latest")
+    List<Comment> retrieveLatestCommentsByCourseCode(@PathVariable("courseCode") String courseCode) {
+        List<Comment> comments = repository.findLatestCommentsByCourseCode(courseCode);
+        if (comments.isEmpty()) {
+            throw new CommentNotFoundException(courseCode);
         }
+        return comments;
     }
 
+    @PostMapping
+    Comment createComment(@RequestBody CommentDTO commentDto) {
+        Student student = studentRepository.findById(commentDto.getStudentId())
+            .orElseThrow(() -> new StudentNotFoundException(commentDto.getStudentId()));
+
+        Course course = courseRepository.findById(commentDto.getCourseCode())
+            .orElseThrow(() -> new CourseNotFoundException(commentDto.getCourseCode()));
+
+        if (commentDto.getBody().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The comment body cannot be empty");
+        }
+
+        Long commentNumber = (long) (repository.findByIdStudentIdAndIdCourseCode(student.getId(), course.getCode()).size() + 1);
+        Comment newComment = new Comment();
+        CommentKey key = new CommentKey(student.getId(), course.getCode(), commentNumber);
+
+        newComment.setId(key);
+        newComment.setCourse(course);
+        newComment.setStudent(student);
+        newComment.setUploadTime(LocalDateTime.now().toString());
+        newComment.setBody(commentDto.getBody());
+
+        return repository.save(newComment);
+    }
+
+    @PutMapping("/{courseCode}/{studentId}/{commentNumber}")
+    Comment updateComment(
+        @PathVariable("courseCode") String courseCode, 
+        @PathVariable("studentId") Long studentId, 
+        @PathVariable("commentNumber") Long commentNumber, 
+        @RequestBody CommentDTO commentDto
+    ) {
+        CommentKey key = new CommentKey(studentId, courseCode, commentNumber);
+        return repository.findById(key)
+            .map(existingComment -> {
+                existingComment.setBody(commentDto.getBody());
+                return repository.save(existingComment);
+            })
+            .orElseThrow(() -> new CommentNotFoundException(studentId, courseCode, commentNumber));
+    }
+
+    @DeleteMapping("/{courseCode}/{studentId}/{commentNumber}")
+    void deleteComment(@PathVariable("courseCode") String courseCode, @PathVariable("studentId") Long studentId, @PathVariable("commentNumber") Long commentNumber) {
+        CommentKey key = new CommentKey(studentId, courseCode, commentNumber);
+        Comment comment = repository.findById(key)
+            .orElseThrow(() -> new CommentNotFoundException(studentId, courseCode, commentNumber));
+        repository.delete(comment);
+    }
 }

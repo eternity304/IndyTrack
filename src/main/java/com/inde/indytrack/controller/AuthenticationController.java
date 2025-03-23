@@ -8,18 +8,18 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import com.inde.indytrack.entity.Admin;
-import com.inde.indytrack.entity.Student;
 import com.inde.indytrack.repository.StudentRepository;
 import com.inde.indytrack.repository.AdminRepository;
 import com.inde.indytrack.dto.LoginDTO;
 import com.inde.indytrack.dto.RegisterDTO;
+import com.inde.indytrack.model.Admin;
+import com.inde.indytrack.model.Student;
 
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-public class AuthController {
+public class AuthenticationController {
 
     private final StudentRepository studentRepository;
     private final AdminRepository adminRepository;
@@ -27,7 +27,7 @@ public class AuthController {
 
     @PostMapping("/register/student")
     public ResponseEntity<String> registerStudent(@RequestBody RegisterDTO newStudent) {
-        if (studentRepository.findByEmail(newStudent.getEmail()) != null) {
+        if (studentRepository.existsByEmail(newStudent.getEmail())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email is already in use");
         }
         // TODO: Hash password
@@ -44,7 +44,7 @@ public class AuthController {
 
     @PostMapping("/register/admin")
     public ResponseEntity<String> registerAdmin(@RequestBody RegisterDTO newAdmin) {
-        if (adminRepository.findByEmail(newAdmin.getEmail()) != null) {
+        if (adminRepository.existsByEmail(newAdmin.getEmail())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email is already in use");
         }
         // TODO: Hash password
