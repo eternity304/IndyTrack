@@ -1,10 +1,10 @@
 package com.inde.indytrack.controller;
 
 import com.inde.indytrack.dto.CoursePlanDTO;
-import com.inde.indytrack.entity.Course;
-import com.inde.indytrack.entity.CoursePlan;
-import com.inde.indytrack.entity.Student;
-import com.inde.indytrack.entity.SemesterCourses;
+import com.inde.indytrack.model.Course;
+import com.inde.indytrack.model.CoursePlan;
+import com.inde.indytrack.model.SemesterCourses;
+import com.inde.indytrack.model.Student;
 import com.inde.indytrack.repository.CoursePlanRepository;
 import com.inde.indytrack.repository.CourseRepository;
 import com.inde.indytrack.repository.StudentRepository;

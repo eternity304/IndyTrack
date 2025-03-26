@@ -1,4 +1,4 @@
-package com.inde.indytrack.entity;
+package com.inde.indytrack.model;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,7 +13,7 @@ import java.util.Map;
 @NoArgsConstructor
 @Getter
 @Setter
-@Table(name = "coursePlans")
+@Table(name = "course_plans")
 public class CoursePlan {
 
     @Id
@@ -21,7 +21,7 @@ public class CoursePlan {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "studentId", nullable = false)
+    @JoinColumn(name = "student_id", nullable = false)
     private Student student;
     
     @OneToMany(mappedBy = "coursePlan", cascade = CascadeType.ALL, orphanRemoval = true)

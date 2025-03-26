@@ -1,4 +1,4 @@
-package com.inde.indytrack.entity;
+package com.inde.indytrack.model;
 
 import lombok.Data;
 import lombok.Getter;
@@ -33,9 +33,11 @@ public abstract class User {
     private Long id;
 
     @NotEmpty
+    @Column(name = "first_name")
     private String firstName;
 
     @NotEmpty
+    @Column(name = "last_name")
     private String lastName;
 
     @Email
