@@ -86,7 +86,7 @@ INSERT INTO courses(code, name, course_type, credit_value, description) VALUES
 INSERT INTO course_plans (student_id) VALUES (1111);
 
 -- Insert semesters into course_plans
-INSERT INTO semester_courses (id, semester, course_plan_id) VALUES (10, 'Fall 2024', 1), (11, 'Winter 2025', 1);
+INSERT INTO semester_courses (id, semester, course_plan_id) VALUES (10, 'Fall2024', 1), (11, 'Winter2025', 1);
 
 -- Insert courses into corresponding semester
 INSERT INTO semester_courses_list (semester_id, course_code) VALUES 

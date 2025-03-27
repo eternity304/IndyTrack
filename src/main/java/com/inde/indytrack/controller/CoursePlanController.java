@@ -60,14 +60,28 @@ public class CoursePlanController {
 
     // Helper method to validate the semester format
     private void validateSemester(String semester) {
-        String[] parts = semester.split(" ");
-        if (parts.length != 2) {
+        if (semester.contains(" ")) {
             throw new InvalidSemesterException(semester);
         }
-        String term = parts[0].trim().toLowerCase();
+
+        int yearIndex = -1;
+        for (int i = 0; i < semester.length(); i++) {
+            if (Character.isDigit(semester.charAt(i))) {
+                yearIndex = i;
+                break;
+            }
+        }
+
+        if (yearIndex == -1) {
+            throw new InvalidSemesterException(semester);
+        }
+
+        String term = semester.substring(0, yearIndex).trim().toLowerCase();
+        String yearString = semester.substring(yearIndex);
+
         int year;
         try {
-            year = Integer.parseInt(parts[1].trim());
+            year = Integer.parseInt(yearString);
         } catch (NumberFormatException e) {
             throw new InvalidSemesterException(semester);
         }
