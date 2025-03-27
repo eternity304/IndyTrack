@@ -6,7 +6,6 @@ import com.inde.indytrack.exception.CoursePlanNotFoundException;
 import com.inde.indytrack.exception.InvalidSemesterException;
 import com.inde.indytrack.exception.SemesterNotFoundException;
 import com.inde.indytrack.exception.StudentNotFoundException;
-import com.inde.indytrack.model.Course;
 import com.inde.indytrack.model.CoursePlan;
 import com.inde.indytrack.model.SemesterCourses;
 import com.inde.indytrack.model.Student;
@@ -21,9 +20,7 @@ import org.springframework.http.HttpStatus;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.ArrayList;
-import java.util.HashSet;
 
 @CrossOrigin
 @RestController
