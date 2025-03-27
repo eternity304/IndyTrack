@@ -1,4 +1,4 @@
-package com.inde.indytrack.entity;
+package com.inde.indytrack.model;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,4 +26,5 @@ public class Student extends User {
     @JsonIgnore
     @Nullable
     private List<CoursePlan> coursePlans;
+    
 }

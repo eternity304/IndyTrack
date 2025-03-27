@@ -1,4 +1,4 @@
-package com.inde.indytrack.entity;
+package com.inde.indytrack.model;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+
 import java.io.Serializable;
 
 @Embeddable
@@ -13,27 +14,27 @@ import java.io.Serializable;
 @Setter
 @NoArgsConstructor
 public class CommentKey implements Serializable {
-    @Column(name = "studentId")
+    @Column(name = "student_id")
     Long studentId;
 
-    @Column(name = "courseId")
-    String courseId;
+    @Column(name = "course_code")
+    String courseCode;
 
-    @Column(name = "time")
-    String time;
+    @Column(name = "comment_number")
+    Long commentNumber;
 
     @Override
     public int hashCode() {
         String concatString = String.valueOf(studentId.hashCode())
-                + String.valueOf(courseId.hashCode())
-                + String.valueOf(time.hashCode());
+                + String.valueOf(courseCode.hashCode())
+                + String.valueOf(commentNumber.hashCode());
         return concatString.hashCode();
     }
 
-    public CommentKey(Long studentId, String courseId, String time) {
+    public CommentKey(Long studentId, String courseCode, Long commentNumber) {
         this.studentId = studentId;
-        this.courseId = courseId;
-        this.time = time;
+        this.courseCode = courseCode;
+        this.commentNumber = commentNumber;
     }
 
     @Override
@@ -46,6 +47,8 @@ public class CommentKey implements Serializable {
         if (!(o instanceof CommentKey))
             return false;
         CommentKey other = (CommentKey) o;
-        return studentId.equals(other.studentId) && courseId.equals(other.courseId) && time.equals(other.time);
+        return studentId.equals(other.studentId) 
+            && courseCode.equals(other.courseCode) 
+            && commentNumber.equals(other.commentNumber);
     }
 }

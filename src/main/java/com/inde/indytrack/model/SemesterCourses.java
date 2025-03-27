@@ -1,4 +1,4 @@
-package com.inde.indytrack.entity;
+package com.inde.indytrack.model;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,7 +15,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @Getter
 @Setter
-@Table(name = "semesters")
+@Table(name = "semester_courses")
 public class SemesterCourses {
 
     @Id
@@ -24,16 +24,17 @@ public class SemesterCourses {
 
     private String semester;  
 
+    @Column(name = "course_code")
     private String courseCode; 
 
     @ElementCollection
-    @CollectionTable(name = "semesterCoursesList", joinColumns = @JoinColumn(name = "semesterId"))
-    @Column(name = "courseId")
+    @CollectionTable(name = "semester_courses_list", joinColumns = @JoinColumn(name = "semester_id"))
+    @Column(name = "course_code")
     private List<String> courses = new ArrayList<>();
 
     @JsonIgnore
     @ManyToOne
-    @JoinColumn(name = "coursePlanId", nullable=false)
+    @JoinColumn(name = "course_plan_id", nullable=false)
     private CoursePlan coursePlan;
 
     public SemesterCourses(String semester, List<String> courses, CoursePlan coursePlan) {

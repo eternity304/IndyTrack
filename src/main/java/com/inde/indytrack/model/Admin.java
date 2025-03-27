@@ -1,4 +1,4 @@
-package com.inde.indytrack.entity;
+package com.inde.indytrack.model;
 
 import javax.persistence.Entity;
 import javax.persistence.DiscriminatorValue;

@@ -7,6 +7,6 @@ import lombok.Setter;
 @Setter
 public class CommentDTO {
     Long studentId;
-    String courseId;
+    String courseCode;
     String body;
 }
