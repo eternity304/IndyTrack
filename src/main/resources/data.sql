@@ -15,21 +15,6 @@ INSERT INTO users (id, first_name, last_name, email, password, user_type) VALUES
 (6666, 'Varys', 'Varys', 'varys.varys@mail.univ.ca', 'password', 'admin'),
 (7777, 'Petyr', 'Baelish', 'petyr.baelish@mail.univ.ca', 'password', 'admin');
 
--- Insert courses without preq
-INSERT INTO courses (code, name, course_type, credit_value, description) VALUES
-('MIE100', 'Dynamics', 'CORE', 0.5, 'This course on Newtonian mechanics considers the interactions which influence 2-D, curvilinear motion. These interactions are described in terms of the concepts of force, work, momentum and energy. Initially the focus is on the kinematics and kinetics of particles. Then, the kinematics and kinetics of systems of particles and solid bodies are examined. Finally, simple harmonic motion is discussed. The occurrence of dynamic motion in natural systems, such as planetary motion, is emphasized. Applications to engineered systems are also introduced'),
-('MIE451', 'Decision Support System', 'TECHNICAL', 0.5, 'Provides students with an understanding of the role of a decision support system in an organization, its components, and the theories and techniques used to construct them. Focuses on information analysis to support organizational decision-making needs and covers topics including information retrieval, descriptive and predictive modeling using machine learning and data mining, recommendation systems, and effective visualization and communication of analytical results.'),
-('APS360', 'Applied Fundamentals of Deep Learning', 'TECHNICAL', 0.5, 'A basic introduction to the history, technology, programming and applications of the fast evolving field of deep learning. Topics to be covered may include neural networks, autoencoders/decoders, recurrent neural networks, natural language processing, and generative adversarial networks. Special attention will be paid to fairness and ethics issues surrounding machine learning. An applied approach will be taken, where students get hands-on exposure to the covered techniques through the use of state-of-the-art machine learning software frameworks.'),
-('MAT157', 'Analysis I', 'TECHNICAL', 0.5, 'A theoretical course in calculus; emphasizing proofs and techniques. Elementary logic, limits and continuity, least upper bounds, intermediate and extreme value theorems. Derivatives, mean value and inverse function theorems. Integrals, fundamental theorem, elementary transcendental functions. Techniques of integration. Taylor''s theorem; sequences and series; uniform convergence and power series. This course is required for the Mathematics Specialist, the Applied Mathematics Specialist, the Mathematics and Physics Specialist, and the Mathematics and Philosophy Specialist program and provides a strong theoretical mathematics background.'),
-('MAT188', 'Linear Algebra', 'TECHNICAL', 0.5, 'This course covers systems of linear equations and Gaussian elimination, applications; vectors in Rn, independent sets and spanning sets; linear transformations, matrices, inverses; subspaces in Rn, basis and dimension; determinants; eigenvalues and diagonalization; systems of differential equations; dot products and orthogonal sets in Rn; projections and the Gram-Schmidt process; diagonalizing symmetric matrices; least squares approximation. Includes an introduction to numeric computation in a weekly laboratory.'),
-('MAT290', 'Advanced Engineering Mathematics', 'TECHNICAL', 0.5, 'An introduction to complex variables and ordinary differential equations. Topics include: Laplace transforms, ordinary higher-order linear differential equations with constant coefficients; transform methods; complex numbers and the complex plane; complex functions; limits and continuity; derivatives and integrals; analytic functions and the Cauchy-Riemann equations; power series as analytic functions; the logarithmic and exponential functions; Cauchy''s integral theorem, Laurent series, residues, Cauchy''s integral formula, the Laplace transform as an analytic function. Examples are drawn from electrical systems.'),
-('ESC194', 'Calculus I', 'TECHNICAL', 0.5, 'Topics include: theory and applications of differential and integral calculus, limits, basic theorems and elementary functions. An introduction to differential equations is also included.'), 
-('MAT257', 'Analysis II', 'TECHNICAL', 0.5, 'Topology of R^n; compactness, functions and continuity, extreme value theorem. Derivatives; inverse and implicit function theorems, maxima and minima, Lagrange multipliers. Integration; Fubini''s theorem, partitions of unity, change of variables. Differential forms. Manifolds in R^n; integration on manifolds; Stokes'' theorem for differential forms and classical versions. Some topics may vary year-to-year.'),
-('MAT347', 'Groups, Rings, and Fields', 'TECHNICAL', 0.5, 'Groups, subgroups, quotient groups, Sylow theorems, Jordan-Hölder theorem, finitely generated abelian groups, solvable groups. Rings, ideals, Chinese remainder theorem; Euclidean domains and principal ideal domains: unique factorization. Noetherian rings, Hilbert basis theorem. Finitely generated modules. Field extensions, algebraic closure, straight-edge and compass constructions. Galois theory, including insolvability of the quintic.'),
-('ESC195', 'Calculus II', 'TECHNICAL', 0.5, 'Topics include: techniques of integration, improper integrals, sequences, series, Taylor''s theorem, as well as an introduction to vector functions, functions of several variables, partial derivatives and the optimization of multivariable functions.'),
-('AER210', 'Vector Calculus & Fluid Mechanics', 'TECHNICAL', 0.5, 'The first part covers multiple integrals and vector calculus. Topics covered include: double and triple integrals, surface area, multiple integrals in polar, cylindrical and spherical coordinates, general coordinate transformations (Jacobians), Taylor series in two variables, line and surface integrals, parametric surfaces, Green''s theorem, the divergence and Stokes''s theorems. The second part provides a general introduction to the principles of continuum fluid mechanics. The basic conservation laws are derived in both differential and integral forms using different fluid models, and the link between the two is demonstrated. Applications covered include: dimensional analysis, hydrostatics, flow visualization, incompressible and compressible frictionless flows, the speed of sound, the momentum principle, viscous flows and selected examples of real fluid flows. The students conduct two hands-on laboratory experiments involving microfluidics and flow visualization, which complement the fluid mechanics lectures and experience technical report writing.'),
-('ECE367', 'Matrix Algebra & Optimization', 'TECHNICAL', 0.5, 'This course will provide students with a grounding in optimization methods and the matrix algebra upon which they are based. The first past of the course focuses on fundamental building blocks in linear algebra and their geometric interpretation: matrices, their use to represent data and as linear operators, and the matrix decompositions (such as eigen-, spectral-, and singular-vector decompositions) that reveal structural and geometric insight. The second part of the course focuses on optimization, both unconstrained and constrained, linear and non-linear, as well as convex and nonconvex; conditions for local and global optimality, as well as basic classes of optimization problems are discussed. Applications from machine learning, signal processing, and engineering are used to illustrate the techniques developed.');
-
 -- Insert core first year courses
 INSERT INTO courses(code, name, course_type, credit_value, description) VALUES
 ('APS100H1', 'Orientation to Engineering', 'CORE', 0.25, 'Designed to help students transition into first-year engineering studies, and to develop and apply a greater understanding of the post-secondary academic learning environment, the field of engineering, application of mathematics and sciences in an engineering context, and properly frame engineering (education) as a socio-technical, people-centred endeavor. Topics include techniques for effective learning, time management, problem solving, successful teamwork, effective communications, test and exam preparation, stress management and wellness, engineering ethics and professionalism, academic integrity and the Student Code of Conduct, applications of math and science in engineering undergraduate research, extra- and co-curricular involvement, and engineering disciplines and career opportunities.'), 
@@ -70,11 +55,7 @@ INSERT INTO courses(code, name, course_type, credit_value, description) VALUES
 
 -- Insert core fourth year courses
 INSERT INTO courses(code, name, course_type, credit_value, description) VALUES 
-('MIE490Y1', 'Capstone Design', 'CORE', 1.0, 'An experience in engineering practice through a significant design project whereby student teams meet specific client needs through a creative, iterative, and open-ended design process. The project must include:
-• The application of disciplinary knowledge and skills to conduct engineering analysis and design,
-• The demonstration of engineering judgment in integrating economic, health, safety, environmental, social or other pertinent interdisciplinary factors,
-• Elements of teamwork, project management and client interaction, and
-• A demonstration of proof of the design concept.');
+('MIE490Y1', 'Capstone Design', 'CORE', 1.0, 'An experience in engineering practice through a significant design project whereby student teams meet specific client needs through a creative, iterative, and open-ended design process. The project must include: • The application of disciplinary knowledge and skills to conduct engineering analysis and design, • The demonstration of engineering judgment in integrating economic, health, safety, environmental, social or other pertinent interdisciplinary factors, • Elements of teamwork, project management and client interaction, and • A demonstration of proof of the design concept.');
 
 -- Insert technical elective courses
 INSERT INTO courses(code, name, course_type, credit_value, description) VALUES 
@@ -99,11 +80,7 @@ INSERT INTO courses(code, name, course_type, credit_value, description) VALUES
 
 -- Insert humanities and social sciences elective courses
 INSERT INTO courses(code, name, course_type, credit_value, description) VALUES 
-('JRE420H1', 'People Management and Organizational Behaviour', 'HSS', 0.5, 'Spans three inter-related topics within organizational behavior and human resources: individual behaviour, group behaviour, and leadership. It provides students with both the theory and practice of how to work, lead, and thrive in organizations. Topics include theories of personality, learning, power, decision making, ethics, culture, leadership, teamwork, and motivation. These topics are taught in three ways:
-Case studies, role play & simulation exercises followed by class discussion
-Surveys of Personality & Skills
-Lectures, discussions, and readings based on the current research on the topic');
-
+('JRE420H1', 'People Management and Organizational Behaviour', 'HSS', 0.5, 'Spans three inter-related topics within organizational behavior and human resources: individual behaviour, group behaviour, and leadership. It provides students with both the theory and practice of how to work, lead, and thrive in organizations. Topics include theories of personality, learning, power, decision making, ethics, culture, leadership, teamwork, and motivation. These topics are taught in three ways: Case studies, role play & simulation exercises followed by class discussion, Surveys of Personality & Skills, Lectures, discussions, and readings based on the current research on the topic');
 
 -- Insert course_plans
 INSERT INTO course_plans (student_id) VALUES (1111);
@@ -113,12 +90,12 @@ INSERT INTO semester_courses (id, semester, course_plan_id) VALUES (10, 'Fall 20
 
 -- Insert courses into corresponding semester
 INSERT INTO semester_courses_list (semester_id, course_code) VALUES 
-(10, 'MIE100'),  -- Fall 2024 courses
-(11, 'MIE451');  -- Winter 2025 courses
+(10, 'MIE236H1'),  -- Fall 2024 courses
+(11, 'MIE237H1');  -- Winter 2025 courses
 
 -- Insert comments
-INSERT INTO comments (student_id, course_code, comment_number, body) VALUES (5555, 'MIE100', 1, 'A comment');
-INSERT INTO comments (student_id, course_code, comment_number, body) VALUES (4444, 'MIE451', 1, 'A bad comment');
+INSERT INTO comments (student_id, course_code, comment_number, body) VALUES (5555, 'MIE236H1', 1, 'A comment');
+INSERT INTO comments (student_id, course_code, comment_number, body) VALUES (4444, 'MIE237H1', 1, 'A bad comment');
 
 -- Insert course_academic_focus
 INSERT INTO course_academic_focus (course_code, academic_focus) VALUES 
@@ -132,6 +109,5 @@ INSERT INTO course_academic_focus (course_code, academic_focus) VALUES
 ('MIE354H1', 'IE'), 
 ('MIE344H1', 'IE'), 
 ('MIE368H1', 'IE'), 
-('MIE343H1', 'HF'), 
 ('MIE344H1', 'HF'), 
 ('MIE345H1', 'HF');
