@@ -4,6 +4,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -35,7 +36,10 @@ public class RatingController {
     @Autowired
     private StudentRepository studentRepository;
 
-    public RatingController(RatingRepository ratingRepository, CourseRepository courseRepository, StudentRepository studentRepository) {
+    public RatingController(
+        RatingRepository ratingRepository, 
+        CourseRepository courseRepository, 
+        StudentRepository studentRepository) {
         this.ratingRepository = ratingRepository;
         this.courseRepository = courseRepository;
         this.studentRepository = studentRepository;
@@ -98,13 +102,13 @@ public class RatingController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Rating value must be between 1 and 5");
         }
 
-        rating.setRatingValue(ratingDto.getRatingValue());
-        ratingRepository.save(rating);
-
         Course course = courseRepository.findById(courseCode)
             .orElseThrow(() -> new CourseNotFoundException(courseCode));
 
         course.updateAverageRating(ratingDto.getRatingValue());
         courseRepository.save(course);
+
+        rating.setRatingValue(ratingDto.getRatingValue());
+        return ratingRepository.save(rating);
     }
 }
