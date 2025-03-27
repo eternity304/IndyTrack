@@ -115,7 +115,7 @@ public class CoursePlanController {
             .orElseThrow(() -> new CoursePlanNotFoundException(planId));
 
         if (findSemesterCourses(coursePlan, semester).isPresent()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Semester " + semester + " already exists in course plan");
+            return coursePlanRepository.save(coursePlan);
         }
 
         SemesterCourses newSemester = new SemesterCourses(semester, new ArrayList<>(), coursePlan);
