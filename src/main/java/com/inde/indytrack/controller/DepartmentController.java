@@ -15,52 +15,47 @@ import java.util.List;
 @RequestMapping("/departments")
 public class DepartmentController {
     @Autowired
-    private final DepartmentRepository repository;
+    private final DepartmentRepository departmentRepository;
 
-    public DepartmentController(DepartmentRepository repository) {
-        this.repository = repository;
+    public DepartmentController(DepartmentRepository departmentRepository) {
+        this.departmentRepository = departmentRepository;
     }
 
     @GetMapping
     public List<Department> retrieveAllDepartments() {
-        return repository.findAll();
+        return departmentRepository.findAll();
     }
 
     @GetMapping("/{code}")
     public Department retrieveDepartment(@PathVariable("code") String departCode) {
-        return repository.findById(departCode)
+        return departmentRepository.findById(departCode)
                 .orElseThrow(() -> new DepartmentNotFoundException(departCode));
     }
 
     @PostMapping
     public Department createDepartment(@RequestBody Department department) {
-        if (repository.existsById(department.getCode())) {
+        if (departmentRepository.existsById(department.getCode())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Department with code " + department.getCode() + " already exists");
         }
-        return repository.save(department);
+        return departmentRepository.save(department);
     }
 
     @PutMapping("/{code}")
     public Department updateDepartment(@RequestBody Department department, @PathVariable("code") String departmentCode) {
-        return repository.findById(departmentCode)
+        return departmentRepository.findById(departmentCode)
                 .map(existingDepartment -> {
                     existingDepartment.setName(department.getName());
                     existingDepartment.setContactEmail(department.getContactEmail());
-                    return repository.save(existingDepartment);
+                    return departmentRepository.save(existingDepartment);
                 })
-                .orElseGet(() -> {
-                    department.setCode(departmentCode);
-                    department.setName(department.getName());
-                    department.setContactEmail(department.getContactEmail());
-                    return repository.save(department);
-                });
+                .orElseThrow(() -> new DepartmentNotFoundException(departmentCode));
     }
 
     @DeleteMapping("/{code}")
     public void deleteDepartment(@PathVariable("code") String departmentCode) {
-        Department department = repository.findById(departmentCode)
+        Department department = departmentRepository.findById(departmentCode)
             .orElseThrow(() -> new DepartmentNotFoundException(departmentCode));
-        repository.delete(department);
+        departmentRepository.delete(department);
     }
 
 }

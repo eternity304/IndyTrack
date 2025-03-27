@@ -90,8 +90,8 @@ INSERT INTO semester_courses (id, semester, course_plan_id) VALUES (10, 'Fall202
 
 -- Insert courses into corresponding semester
 INSERT INTO semester_courses_list (semester_id, course_code) VALUES 
-(10, 'MIE236H1'),  -- Fall 2024 courses
-(11, 'MIE237H1');  -- Winter 2025 courses
+(10, 'MIE236H1'),  -- Fall2024 courses
+(11, 'MIE237H1');  -- Winter2025 courses
 
 -- Insert comments
 INSERT INTO comments (student_id, course_code, comment_number, body) VALUES (5555, 'MIE236H1', 1, 'A comment');

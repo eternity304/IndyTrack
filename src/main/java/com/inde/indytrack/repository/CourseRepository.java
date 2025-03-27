@@ -30,7 +30,7 @@ public interface CourseRepository extends JpaRepository<Course, String>, JpaSpec
 
     @Query(
         value = "SELECT * FROM courses c " + 
-                "WHERE SUBSTRING(c.code, POSITION(SUBSTRING(c.code FROM '[0-9]') IN c.code), 1) = CAST(:level/100 AS VARCHAR)",
+                "WHERE (:level REGEXP_LIKE(c.code, CONCAT('^[A-Z]+', CAST(:level/100 AS VARCHAR))))",
                 nativeQuery = true
     ) public List<Course> findByLevel(@Param("level") Integer level);
 
@@ -40,8 +40,9 @@ public interface CourseRepository extends JpaRepository<Course, String>, JpaSpec
                 "AND (:name IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT('%', :name, '%'))) " +
                 "AND (:courseType IS NULL OR c.course_type = :courseType) " +
                 "AND (:creditValue IS NULL OR c.credit_value = :creditValue) " +
-                "AND (:academicFocus IS NULL OR EXISTS (SELECT 1 FROM course_academic_focus caf WHERE caf.course_code = c.code AND caf.academic_focus = :academicFocus)) " +
-                "AND (:level IS NULL OR SUBSTRING(c.code, POSITION(SUBSTRING(c.code FROM '[0-9]') IN c.code), 1) = CAST(:level/100 AS VARCHAR))",
+                "AND (:academicFocus IS NULL OR EXISTS (SELECT 1 FROM course_academic_focus caf " +
+                "     WHERE caf.course_code = c.code AND caf.academic_focus = :academicFocus)) " + 
+                "AND (:level IS NULL OR REGEXP_LIKE(c.code, CONCAT('^[A-Z]+', CAST(:level/100 AS VARCHAR))))",
         nativeQuery = true
     )
     List<Course> searchCourses(
