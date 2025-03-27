@@ -41,10 +41,10 @@ public interface CourseRepository extends JpaRepository<Course, String>, JpaSpec
                 "AND (:courseType IS NULL OR c.course_type = :courseType) " +
                 "AND (:creditValue IS NULL OR c.credit_value = :creditValue) " +
                 "AND (:academicFocus IS NULL OR EXISTS (SELECT 1 FROM course_academic_focus caf " +
-                "     WHERE caf.course_code = c.code AND caf.academic_focus = :academicFocus)) " + 
-                "AND (:level IS NULL OR REGEXP_LIKE(c.code, CONCAT('^[A-Z]+', CAST(:level/100 AS VARCHAR))))",
-        nativeQuery = true
-    )
+                "     WHERE caf.course_code = c.code AND caf.academic_focus = :academicFocus)) " +
+                "AND (:level IS NULL OR REGEXP_LIKE(c.code, CONCAT('^[A-Z]+', CAST(CASE WHEN :level IS NULL THEN NULL ELSE :level/100 END AS VARCHAR))))",
+            nativeQuery = true
+        )
     List<Course> searchCourses(
         @Param("code") String code,
         @Param("name") String name,
