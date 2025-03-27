@@ -3,8 +3,8 @@ package com.inde.indytrack.model;
 public enum CourseType {
     CORE("Core Required"), 
     TECHNICAL("Technical Elective"), 
-    HSS("HSS Elective"),  
-    CS("CS Elective");
+    HSS("Humanities and Social Sciences Elective"),  
+    CS("Complementary Studies Elective");
 
     private String displayName;
 

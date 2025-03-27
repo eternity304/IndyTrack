@@ -2,7 +2,9 @@ package com.inde.indytrack.controller;
 
 import com.inde.indytrack.dto.CourseDTO;
 import com.inde.indytrack.exception.CourseNotFoundException;
+import com.inde.indytrack.model.AcademicFocus;
 import com.inde.indytrack.model.Course;
+import com.inde.indytrack.model.CourseType;
 import com.inde.indytrack.repository.CourseRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,5 +78,24 @@ public class CourseController {
             throw new CourseNotFoundException(level);
         }
         return courses;
+    }
+
+    @GetMapping("/search")
+    public List<Course> searchCourses(
+        @RequestParam(required = false) String code,
+        @RequestParam(required = false) String name,
+        @RequestParam(required = false) CourseType courseType,
+        @RequestParam(required = false) Long creditValue,
+        @RequestParam(required = false) AcademicFocus academicFocus,
+        @RequestParam(required = false) Integer level
+    ) {
+        return repository.searchCourses(
+            code,
+            name,
+            courseType != null ? courseType.name() : null,
+            creditValue,
+            academicFocus != null ? academicFocus.name() : null,
+            level
+        );
     }
 }
