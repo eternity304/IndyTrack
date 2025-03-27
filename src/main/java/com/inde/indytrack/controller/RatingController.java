@@ -8,10 +8,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.inde.indytrack.dto.RatingDTO;
 import com.inde.indytrack.exception.CourseNotFoundException;
+import com.inde.indytrack.exception.InvalidRatingException;
 import com.inde.indytrack.exception.RatingNotFoundException;
 import com.inde.indytrack.exception.StudentNotFoundException;
 import com.inde.indytrack.model.Course;
@@ -23,7 +23,7 @@ import com.inde.indytrack.repository.RatingRepository;
 import com.inde.indytrack.repository.StudentRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+
 @RestController
 @RequestMapping("/ratings")
 public class RatingController {
@@ -62,7 +62,7 @@ public class RatingController {
             .orElseThrow(() -> new StudentNotFoundException(ratingDto.getStudentId()));
             
         if (ratingDto.getRatingValue() < 1 || ratingDto.getRatingValue() > 5) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Rating value must be between 1 and 5");
+            throw new InvalidRatingException();
         }
 
         Rating rating = new Rating();
@@ -79,8 +79,7 @@ public class RatingController {
 
     @DeleteMapping("/{courseCode}/{studentId}")
     public void deleteRating(@PathVariable String courseCode, @PathVariable Long studentId) {
-        RatingKey ratingKey = new RatingKey(courseCode, studentId);
-        Rating rating = ratingRepository.findById(ratingKey)
+        Rating rating = ratingRepository.findById(new RatingKey(courseCode, studentId))
             .orElseThrow(() -> new RatingNotFoundException(courseCode, studentId));
 
         ratingRepository.delete(rating);
@@ -93,13 +92,15 @@ public class RatingController {
     }
 
     @PutMapping("/{courseCode}/{studentId}")
-    public Rating updateRating(@PathVariable String courseCode, @PathVariable Long studentId, @RequestBody RatingDTO ratingDto) {
-        RatingKey ratingKey = new RatingKey(courseCode, studentId);
-        Rating rating = ratingRepository.findById(ratingKey)
+    public Rating updateRating(
+        @PathVariable String courseCode, 
+        @PathVariable Long studentId, 
+        @RequestBody RatingDTO ratingDto) {
+        Rating rating = ratingRepository.findById(new RatingKey(courseCode, studentId))
             .orElseThrow(() -> new RatingNotFoundException(courseCode, studentId));
 
         if (ratingDto.getRatingValue() < 1 || ratingDto.getRatingValue() > 5) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Rating value must be between 1 and 5");
+            throw new InvalidRatingException();
         }
 
         Course course = courseRepository.findById(courseCode)
