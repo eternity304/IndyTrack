@@ -10,15 +10,10 @@ import javax.persistence.Entity;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.OneToMany;
 import javax.persistence.CascadeType;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @DiscriminatorValue("student")
@@ -31,13 +26,5 @@ public class Student extends User {
     @JsonIgnore
     @Nullable
     private List<CoursePlan> coursePlans;
-
-    @ManyToMany
-    @JoinTable(
-        name = "student_intended_minors", 
-        joinColumns = @JoinColumn(name = "student_id"),
-        inverseJoinColumns = @JoinColumn(name = "minor_name", referencedColumnName = "name")
-    )
-    private Set<Minor> intendedMinors = new HashSet<>();
     
 }

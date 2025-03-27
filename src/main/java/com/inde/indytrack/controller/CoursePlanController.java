@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 @CrossOrigin
 @RestController
@@ -129,24 +130,6 @@ public class CoursePlanController {
         return year * 10 + termOrder;
     }
 
-    private boolean isCourseCompletedInPreviousSemesters(Course prerequisite, List<SemesterCourses> semesters, int currentSemesterOrder) {
-        /**
-        Checks if a prerequisite course was completed in any semester before the current one.
-        */
-        for (SemesterCourses sc : semesters) {
-            if (getSemesterOrder(sc.getSemester()) < currentSemesterOrder && sc.getCourses().contains(prerequisite.getCode())) {
-                return true;  
-            }
-        }
-
-        for (Course prereqPrerequisite : prerequisite.getPrerequisites()) {
-            if (!isCourseCompletedInPreviousSemesters(prereqPrerequisite, semesters, currentSemesterOrder)) {
-                return false;
-            }
-        }
-
-        return false;
-    }
     @PutMapping("/{planId}/{semester}")
     public CoursePlan addSemester(
         @PathVariable Long planId,
@@ -198,21 +181,7 @@ public class CoursePlanController {
         }
 
         SemesterCourses semesterCourses = optionalSemesterCourses.get();
-    
-        // Check prereq
-        Set<Course> prerequisites = course.getPrerequisites();
-        List<String> missingPrerequisites = new ArrayList<>();
 
-        for (Course prerequisite : prerequisites) {
-            if (!isCourseCompletedInPreviousSemesters(prerequisite, semesters, currentSemesterOrder)) {
-                missingPrerequisites.add(prerequisite.getCode());
-            }
-        }
-
-        if (!missingPrerequisites.isEmpty()) {
-            System.err.println("Course " + courseId + " has missing prerequisite(s): " + missingPrerequisites);
-        }
-        
         if (!semesterCourses.getCourses().contains(courseId)) {
             semesterCourses.getCourses().add(courseId);
         }

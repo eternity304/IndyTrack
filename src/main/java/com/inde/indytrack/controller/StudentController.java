@@ -2,12 +2,8 @@ package com.inde.indytrack.controller;
 
 import com.inde.indytrack.dto.RegisterDTO;
 import com.inde.indytrack.dto.StudentDTO;
-import com.inde.indytrack.dto.MinorProgressDTO;
-import com.inde.indytrack.exception.MinorNotFoundException;
 import com.inde.indytrack.exception.StudentNotFoundException;
-import com.inde.indytrack.model.Minor;
 import com.inde.indytrack.model.Student;
-import com.inde.indytrack.repository.MinorRepository;
 import com.inde.indytrack.repository.StudentRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,9 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @CrossOrigin
@@ -28,11 +22,8 @@ public class StudentController {
     private final StudentRepository repository;
 
     @Autowired
-    private final MinorRepository minorRepository;
-
-    public StudentController(StudentRepository repository, MinorRepository minorRepository) {
+    public StudentController(StudentRepository repository) {
         this.repository = repository;
-        this.minorRepository = minorRepository;
     }
 
     @GetMapping
@@ -100,59 +91,5 @@ public class StudentController {
     @GetMapping("names/{name}")
     public List<StudentDTO> retrieveStudentByName(@PathVariable("name") String name) {
         return repository.findByFirstOrLastName(name).stream().map(this::convertStudentToDTO).collect(Collectors.toList());
-    }
-
-    @GetMapping("/{id}/intended-minors")
-    public List<MinorProgressDTO> retrieveIntendedMinors(@PathVariable("id") Long studentId) {
-        Student student = repository.findById(studentId).orElseThrow(() -> new StudentNotFoundException(studentId));
-
-        List<String> intendedMinorNames = student.getIntendedMinors().stream().map(Minor::getName).collect(Collectors.toList());
-        
-        List<MinorProgressDTO> intendedMinorsProgress = new ArrayList<>();
-
-        for (String minorName : intendedMinorNames) {
-            intendedMinorsProgress.addAll(repository.findIntendedMinorsProgress(studentId, minorName));
-        }
-
-        return intendedMinorsProgress;
-    }
-
-    @PostMapping("/{id}/intended-minors/{minorName}")
-    public void createIntendedMinor(@PathVariable("id") Long studentId, @PathVariable("minorName") String minorName) {
-        Student student = repository.findById(studentId).orElseThrow(() -> new StudentNotFoundException(studentId));
-        Minor minor = minorRepository.findById(minorName).orElseThrow(() -> new MinorNotFoundException(minorName));
-
-        if (!student.getIntendedMinors().contains(minor)) {
-            student.getIntendedMinors().add(minor);
-            repository.save(student);
-        } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Minor is already in the student's intended minors");
-        }
-    }
-
-    @DeleteMapping("/{id}/intended-minors/{minorName}")
-    public void deleteIntendedMinor(@PathVariable("id") Long studentId, @PathVariable("minorName") String minorName) {
-        Student student = repository.findById(studentId).orElseThrow(() -> new StudentNotFoundException(studentId));
-        Minor minor = minorRepository.findById(minorName).orElseThrow(() -> new MinorNotFoundException(minorName));
-
-        if (student.getIntendedMinors().contains(minor)) {
-            student.getIntendedMinors().remove(minor);
-            repository.save(student);
-        } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The " + minorName + " minor is not in the student's intended minors");
-        }
-    }
-
-    @GetMapping("/{id}/suggested-minors")
-    public List<MinorProgressDTO> retrieveSuggestedMinors(@PathVariable("id") Long studentId) {
-        Student student = repository.findById(studentId).orElseThrow(() -> new StudentNotFoundException(studentId));
-
-        List<MinorProgressDTO> suggestedMinorsProgress = repository.findSuggestedMinorsProgress(studentId);
-
-        Set<String> intendedMinorNames = student.getIntendedMinors().stream().map(Minor::getName).collect(Collectors.toSet());
-
-        suggestedMinorsProgress.removeIf(suggestedMinor -> intendedMinorNames.contains(suggestedMinor.getMinorName()));
-
-        return suggestedMinorsProgress;
     }
 }

@@ -33,15 +33,6 @@ INSERT INTO courses (code, name, course_type, credit_value, description) VALUES
 ('AER210', 'Vector Calculus & Fluid Mechanics', 'TECHNICAL', 0.5, 'The first part covers multiple integrals and vector calculus. Topics covered include: double and triple integrals, surface area, multiple integrals in polar, cylindrical and spherical coordinates, general coordinate transformations (Jacobians), Taylor series in two variables, line and surface integrals, parametric surfaces, Green''s theorem, the divergence and Stokes''s theorems. The second part provides a general introduction to the principles of continuum fluid mechanics. The basic conservation laws are derived in both differential and integral forms using different fluid models, and the link between the two is demonstrated. Applications covered include: dimensional analysis, hydrostatics, flow visualization, incompressible and compressible frictionless flows, the speed of sound, the momentum principle, viscous flows and selected examples of real fluid flows. The students conduct two hands-on laboratory experiments involving microfluidics and flow visualization, which complement the fluid mechanics lectures and experience technical report writing.'),
 ('ECE367', 'Matrix Algebra & Optimization', 'TECHNICAL', 0.5, 'This course will provide students with a grounding in optimization methods and the matrix algebra upon which they are based. The first past of the course focuses on fundamental building blocks in linear algebra and their geometric interpretation: matrices, their use to represent data and as linear operators, and the matrix decompositions (such as eigen-, spectral-, and singular-vector decompositions) that reveal structural and geometric insight. The second part of the course focuses on optimization, both unconstrained and constrained, linear and non-linear, as well as convex and nonconvex; conditions for local and global optimality, as well as basic classes of optimization problems are discussed. Applications from machine learning, signal processing, and engineering are used to illustrate the techniques developed.');
 
-INSERT INTO course_prerequisites (course_code, prerequisite_course_code) VALUES
-('MAT347', 'MAT257'),
-('MAT347', 'MIE100'),
-('MAT257', 'MAT157'),
-('ESC195', 'ESC194'),
-('AER210', 'ESC195'),
-('ECE367', 'AER210'),
-('ECE367', 'MAT188');
-
 -- Insert course_plans
 INSERT INTO course_plans (student_id) VALUES (1111);
 
@@ -57,20 +48,5 @@ INSERT INTO semester_courses_list (semester_id, course_code) VALUES
 INSERT INTO comments (student_id, course_code, comment_number, body) VALUES (5555, 'MIE100', 1, 'A comment');
 INSERT INTO comments (student_id, course_code, comment_number, body) VALUES (4444, 'MIE451', 1, 'A bad comment');
 
--- Insert minors
-INSERT INTO minors (name) VALUES ('Artificial Intelligence Engineering');
-
--- Insert minor requirements
-INSERT INTO minor_requirements (id, minor_name, required_credits) VALUES (1, 'Artificial Intelligence Engineering', 3.0);
-
--- Insert course_minors
-INSERT INTO course_minors (course_code, minor_name) VALUES ('APS360', 'Artificial Intelligence Engineering');
-
 -- Insert course_academic_focus
 INSERT INTO course_academic_focus (course_code, academic_focus) VALUES ('APS360', 'AI_ML');
-
--- Insert minor_requirement_courses
-INSERT INTO minor_requirement_courses (minor_requirement_id, course_code) VALUES (1, 'APS360');
-
--- Insert intended minors
-INSERT INTO student_intended_minors (student_id, minor_name) VALUES (1111, 'Artificial Intelligence Engineering');
