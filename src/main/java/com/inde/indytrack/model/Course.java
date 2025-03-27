@@ -10,8 +10,12 @@ import javax.validation.constraints.NotEmpty;
 
 import org.springframework.lang.Nullable;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.HashSet;
 import java.util.Set;
+import java.util.List;
+import java.util.ArrayList;
 
 @Entity
 @NoArgsConstructor
@@ -45,6 +49,16 @@ public class Course {
     @Nullable
     private Set<AcademicFocus> academicFocus = new HashSet<>();
 
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<Rating> ratings = new ArrayList<>();
+
+    @Column(name = "average_rating")
+    private Double averageRating;
+
+    @Column(name = "rating_count")
+    private Integer ratingCount = 0;
+
     public Course(
         String code, 
         String name, 
@@ -61,4 +75,17 @@ public class Course {
         this.academicFocus = academicFocus != null ? academicFocus : new HashSet<>();
     }
 
+    public void updateAverageRating(Integer newRating) {
+        double totalRating = this.averageRating * this.ratingCount + newRating;
+        this.ratingCount++;
+        this.averageRating = totalRating / this.ratingCount;
+    }
+
+    public void removeRating(Integer existingRating) {
+        if (this.ratingCount > 0) {
+            double totalRating = this.averageRating * this.ratingCount - existingRating;
+            this.ratingCount--;
+            this.averageRating = this.ratingCount > 0 ? totalRating / this.ratingCount : 0.0;
+        }
+    }
 }
