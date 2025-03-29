@@ -6,8 +6,6 @@ import lombok.Setter;
 
 import javax.persistence.*;
 
-import com.inde.indytrack.exception.SemesterFullException;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
