@@ -5,6 +5,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+
+import com.inde.indytrack.exception.SemesterFullException;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +35,9 @@ public class CoursePlan {
 
         if (semesterCourses != null) {
             for (Map.Entry<String, List<String>> entry : semesterCourses.entrySet()) {
+                if (entry.getValue().size() > 6) {
+                    throw new SemesterFullException(entry.getKey());
+                }
                 SemesterCourses semesterCoursesEntity = new SemesterCourses(entry.getKey(), entry.getValue(), this);
                 semesterCoursesList.add(semesterCoursesEntity);
             }
