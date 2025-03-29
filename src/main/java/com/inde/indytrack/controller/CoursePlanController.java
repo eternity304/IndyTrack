@@ -100,7 +100,14 @@ public class CoursePlanController {
         }
 
         CoursePlan coursePlan = new CoursePlan(student, coursePlanDto.getSemesterCourses());
-        return coursePlanRepository.save(coursePlan);
+        CoursePlan savedCoursePlan = coursePlanRepository.save(coursePlan);
+
+        if (coursePlanRepository.existsById(savedCoursePlan.getId())) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, 
+                "Failed to create course plan - ID generated was not unique");
+        }
+
+        return savedCoursePlan;
     }
 
     @DeleteMapping("/{planId}")
