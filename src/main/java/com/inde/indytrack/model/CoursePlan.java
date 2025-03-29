@@ -35,9 +35,6 @@ public class CoursePlan {
 
         if (semesterCourses != null) {
             for (Map.Entry<String, List<String>> entry : semesterCourses.entrySet()) {
-                if (entry.getValue().size() > 6) {
-                    throw new SemesterFullException(entry.getKey());
-                }
                 SemesterCourses semesterCoursesEntity = new SemesterCourses(entry.getKey(), entry.getValue(), this);
                 semesterCoursesList.add(semesterCoursesEntity);
             }
