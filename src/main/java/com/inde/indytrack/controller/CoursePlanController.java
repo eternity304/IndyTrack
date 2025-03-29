@@ -100,14 +100,7 @@ public class CoursePlanController {
         }
 
         CoursePlan coursePlan = new CoursePlan(student, coursePlanDto.getSemesterCourses());
-        CoursePlan savedCoursePlan = coursePlanRepository.save(coursePlan);
-
-        if (coursePlanRepository.existsById(savedCoursePlan.getId())) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, 
-                "Failed to create course plan - ID generated was not unique");
-        }
-
-        return savedCoursePlan;
+        return coursePlanRepository.save(coursePlan);
     }
 
     @DeleteMapping("/{planId}")
@@ -121,7 +114,7 @@ public class CoursePlanController {
     // Helper method to find semester courses in a course plan
     private Optional<SemesterCourses> findSemesterCourses(CoursePlan coursePlan, String semester) {
         return coursePlan.getSemesterCoursesList().stream()
-                .filter(sc -> sc.getSemester().equals(semester))
+                .filter(sc -> sc.getSemester().equalsIgnoreCase(semester))
                 .findFirst();
     }
 
@@ -132,11 +125,18 @@ public class CoursePlanController {
         CoursePlan coursePlan = coursePlanRepository.findById(planId)
             .orElseThrow(() -> new CoursePlanNotFoundException(planId));
 
-        if (findSemesterCourses(coursePlan, semester).isPresent()) {
-            return coursePlanRepository.save(coursePlan);
+        // Normalize semester string to match the format
+        String normalizedSemester = semester.trim();
+
+        // Check if semester already exists (case-insensitive)
+        boolean semesterExists = coursePlan.getSemesterCoursesList().stream()
+                .anyMatch(sc -> sc.getSemester().equalsIgnoreCase(normalizedSemester));
+
+        if (semesterExists) {
+            return coursePlan; // Return existing plan if semester already exists
         }
 
-        SemesterCourses newSemester = new SemesterCourses(semester, new ArrayList<>(), coursePlan);
+        SemesterCourses newSemester = new SemesterCourses(normalizedSemester, new ArrayList<>(), coursePlan);
         coursePlan.getSemesterCoursesList().add(newSemester);
         return coursePlanRepository.save(coursePlan);
     }
