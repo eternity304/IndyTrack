@@ -136,3 +136,6 @@ INSERT INTO course_academic_focus (course_code, academic_focus) VALUES
 INSERT INTO ratings (course_code, student_id, rating_value) VALUES 
 ('MIE368H1', 1111, 5), 
 ('MIE370H1', 1111, 4), 
+('MIE369H1', 1111, 5), 
+('MIE363H1', 1111, 5), 
+('MIE245H1', 1111, 3);

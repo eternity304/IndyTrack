@@ -53,20 +53,20 @@ public class RatingController {
         return course.getAverageRating();
     }
     
-    @PostMapping
-    public Rating createRating(@RequestBody RatingDTO ratingDto) {
-        Course course = courseRepository.findById(ratingDto.getCourseCode())
-            .orElseThrow(() -> new CourseNotFoundException(ratingDto.getCourseCode()));
+    @PostMapping("/{courseCode}/{studentId}")
+    public Rating createRating(@PathVariable String courseCode, @PathVariable Long studentId, @RequestBody RatingDTO ratingDto) {
+        Course course = courseRepository.findById(courseCode)
+            .orElseThrow(() -> new CourseNotFoundException(courseCode));
 
-        Student student = studentRepository.findById(ratingDto.getStudentId())
-            .orElseThrow(() -> new StudentNotFoundException(ratingDto.getStudentId()));
+        Student student = studentRepository.findById(studentId)
+            .orElseThrow(() -> new StudentNotFoundException(studentId));
             
         if (ratingDto.getRatingValue() < 1 || ratingDto.getRatingValue() > 5) {
             throw new InvalidRatingException();
         }
 
         Rating rating = new Rating();
-        rating.setId(new RatingKey(ratingDto.getCourseCode(), ratingDto.getStudentId()));
+        rating.setId(new RatingKey(courseCode, studentId));
         rating.setCourse(course);
         rating.setStudent(student);
         rating.setRatingValue(ratingDto.getRatingValue());
