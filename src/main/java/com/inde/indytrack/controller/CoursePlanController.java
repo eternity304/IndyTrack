@@ -4,6 +4,7 @@ import com.inde.indytrack.dto.CoursePlanDTO;
 import com.inde.indytrack.exception.CourseNotFoundException;
 import com.inde.indytrack.exception.CoursePlanNotFoundException;
 import com.inde.indytrack.exception.InvalidSemesterException;
+import com.inde.indytrack.exception.SemesterFullException;
 import com.inde.indytrack.exception.SemesterNotFoundException;
 import com.inde.indytrack.exception.StudentNotFoundException;
 import com.inde.indytrack.model.CoursePlan;
@@ -19,7 +20,6 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.ArrayList;
 
 @CrossOrigin
@@ -112,10 +112,11 @@ public class CoursePlanController {
     }
 
     // Helper method to find semester courses in a course plan
-    private Optional<SemesterCourses> findSemesterCourses(CoursePlan coursePlan, String semester) {
+    private SemesterCourses findSemesterCourses(CoursePlan coursePlan, String semester, Long planId) {
         return coursePlan.getSemesterCoursesList().stream()
-                .filter(sc -> sc.getSemester().equals(semester))
-                .findFirst();
+                .filter(sc -> sc.getSemester().equalsIgnoreCase(semester))
+                .findFirst()
+                .orElseThrow(() -> new SemesterNotFoundException(semester, planId));
     }
 
     @PutMapping("/{planId}/{semester}")
@@ -125,13 +126,15 @@ public class CoursePlanController {
         CoursePlan coursePlan = coursePlanRepository.findById(planId)
             .orElseThrow(() -> new CoursePlanNotFoundException(planId));
 
-        if (findSemesterCourses(coursePlan, semester).isPresent()) {
+        try {
+            findSemesterCourses(coursePlan, semester, planId);
+            return coursePlan; // Semester already exists
+        } catch (SemesterNotFoundException e) {
+            // Semester doesn't exist, create new one
+            SemesterCourses newSemester = new SemesterCourses(semester, new ArrayList<>(), coursePlan);
+            coursePlan.getSemesterCoursesList().add(newSemester);
             return coursePlanRepository.save(coursePlan);
         }
-
-        SemesterCourses newSemester = new SemesterCourses(semester, new ArrayList<>(), coursePlan);
-        coursePlan.getSemesterCoursesList().add(newSemester);
-        return coursePlanRepository.save(coursePlan);
     }
 
     @PutMapping("/{planId}/{semester}/{courseId}")
@@ -145,8 +148,11 @@ public class CoursePlanController {
             throw new CourseNotFoundException(courseId);
         }
 
-        SemesterCourses semesterCourses = findSemesterCourses(coursePlan, semester)
-            .orElseThrow(() -> new SemesterNotFoundException(semester, planId));
+        SemesterCourses semesterCourses = findSemesterCourses(coursePlan, semester, planId);
+
+        if (semesterCourses.getCourses().size() >= 6) {
+            throw new SemesterFullException(semester);
+        }
 
         if (!semesterCourses.getCourses().contains(courseId)) {
             semesterCourses.getCourses().add(courseId);
@@ -159,25 +165,17 @@ public class CoursePlanController {
     public CoursePlan removeCourseFromSemester(
             @PathVariable Long planId,
             @PathVariable String semester,
-            @PathVariable String courseCode
-    ) {
-
-        // Fetch the course plan or return error for not found
+            @PathVariable String courseCode) {
         CoursePlan coursePlan = coursePlanRepository.findById(planId)
                 .orElseThrow(() -> new CoursePlanNotFoundException(planId));
 
-        // Find the semester in the course plan or throw exception
-        SemesterCourses semesterCourses = coursePlan.getSemesterCoursesList().stream()
-                .filter(sc -> sc.getSemester().toLowerCase().equals(semester.trim().toLowerCase()))
-                .findFirst()
-                .orElseThrow(() -> new SemesterNotFoundException(semester, planId));
+        SemesterCourses semesterCourses = findSemesterCourses(coursePlan, semester, planId);
 
-        // Remove the course if it exists
         if (!semesterCourses.getCourses().remove(courseCode)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Did not find course " + courseCode + " in semester " + semester);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, 
+                "Did not find course " + courseCode + " in semester " + semester);
         }
 
-        // If the semester has no more courses, remove it completely (Optional)
         if (semesterCourses.getCourses().isEmpty()) {
             coursePlan.getSemesterCoursesList().remove(semesterCourses);
         }
@@ -205,4 +203,15 @@ public class CoursePlanController {
         return coursePlanRepository.save(coursePlan);
     }
 
+    @DeleteMapping("/{planId}/{semester}/clear")
+    public CoursePlan clearSemesterCourses(@PathVariable Long planId, @PathVariable String semester) {
+        CoursePlan coursePlan = coursePlanRepository.findById(planId)
+                .orElseThrow(() -> new CoursePlanNotFoundException(planId));
+
+        SemesterCourses semesterCourses = findSemesterCourses(coursePlan, semester, planId);
+
+        semesterCourses.setCourses(new ArrayList<>());
+
+        return coursePlanRepository.save(coursePlan);
+    }
 }
