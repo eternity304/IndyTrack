@@ -109,13 +109,14 @@ INSERT INTO course_plans (student_id) VALUES (1111);
 INSERT INTO semester_courses (id, semester, course_plan_id) VALUES (10, 'Fall2024', 1), (11, 'Winter2025', 1);
 
 -- Insert courses into corresponding semester
-INSERT INTO semester_courses_list (semester_id, course_code) VALUES 
+INSERT INTO semester_courses_list (semester_id, course_code) VALUES
 (10, 'MIE236H1'),  -- Fall2024 courses
 (11, 'MIE237H1');  -- Winter2025 courses
 
+
 -- Insert comments
-INSERT INTO comments (student_id, course_code, comment_number, body) VALUES (5555, 'MIE236H1', 1, 'A comment');
-INSERT INTO comments (student_id, course_code, comment_number, body) VALUES (4444, 'MIE237H1', 1, 'A bad comment');
+INSERT INTO comments (student_id, course_code, comment_number, body) VALUES (5555, 'MIE236H1', 1, 'This course gave me a solid foundation in understanding uncertainty and how to model it — something I didn’t realize was so important in engineering until now. At first, the concepts like sample space and random variables felt pretty abstract, but over time, I started to see how they connect to real-world systems, like network reliability or quality control in manufacturing. Learning about distributions like the normal and Poisson made me appreciate how much of the real world can actually be modeled with math.');
+INSERT INTO comments (student_id, course_code, comment_number, body) VALUES (4444, 'MIE237H1', 1, 'This course really changed the way I think about data. It’s not just about collecting numbers — its about how you collect them, why you are collecting them, and what you can actually learn from them. I had never really thought about the difference between observational and experimental data before, or how that affects what kinds of conclusions you can draw. The emphasis on building models for inference versus prediction was also something that stuck with me — it’s a subtle but powerful distinction.');
 
 -- Insert course_academic_focus
 INSERT INTO course_academic_focus (course_code, academic_focus) VALUES 

@@ -205,7 +205,7 @@ public class CoursePlanController {
         return coursePlanRepository.save(coursePlan);
     }
 
-    @GetMapping("/{planId}/{semester}/clear")
+    @DeleteMapping("/{planId}/{semester}/clear")
     public CoursePlan clearSemesterCourses(@PathVariable Long planId, @PathVariable String semester) {
         CoursePlan coursePlan = coursePlanRepository.findById(planId)
                 .orElseThrow(() -> new CoursePlanNotFoundException(planId));
