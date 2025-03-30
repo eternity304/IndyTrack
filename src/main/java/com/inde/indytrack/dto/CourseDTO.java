@@ -17,4 +17,5 @@ public class CourseDTO {
     private CourseType courseType;
     private Long creditValue;
     private Set<AcademicFocus> academicFocus;
+    private Set<String> prerequisiteCodes;
 }

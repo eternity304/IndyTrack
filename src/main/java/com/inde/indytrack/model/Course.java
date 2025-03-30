@@ -59,13 +59,31 @@ public class Course {
     @Column(name = "rating_count")
     private Integer ratingCount = 0;
 
+    @Transient  // This annotation means the field won't be stored in the database
+    public String getSkuleUrl() {
+        return "https://courses.skule.ca/course/" + this.code;
+    }
+
+    @ManyToMany
+    @JoinTable(
+        name = "course_prerequisites",
+        joinColumns = @JoinColumn(name = "course_code"),
+        inverseJoinColumns = @JoinColumn(name = "prerequisite_code")
+    )
+    private Set<Course> prerequisites = new HashSet<>();
+
+    @ManyToMany(mappedBy = "prerequisites")
+    @JsonIgnore
+    private Set<Course> isPrerequisiteFor = new HashSet<>();
+
     public Course(
         String code, 
         String name, 
         String description, 
         CourseType courseType, 
         Long creditValue, 
-        Set<AcademicFocus> academicFocus
+        Set<AcademicFocus> academicFocus,
+        Set<Course> prerequisites
     ) {
         this.code = code;
         this.name = name;
@@ -75,6 +93,7 @@ public class Course {
         this.academicFocus = academicFocus != null ? academicFocus : new HashSet<>();
         this.averageRating = 0.0;
         this.ratingCount = 0;
+        this.prerequisites = prerequisites;
     }
 
     public void updateAverageRating(Integer newRating) {
