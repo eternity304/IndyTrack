@@ -5,8 +5,9 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class RatingDTO {
+public class ReviewDTO {
     private String courseCode;
     private Long studentId;
-    private Integer ratingValue;
+    private Integer rating;
+    private String comment;
 }

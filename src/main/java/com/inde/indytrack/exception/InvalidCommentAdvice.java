@@ -7,11 +7,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ControllerAdvice
-public class CommentNotFoundAdvice {
+public class InvalidCommentAdvice {
     @ResponseBody
-    @ExceptionHandler(CommentNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    String commentNotFoundHandler(CommentNotFoundException ex) {
+    @ExceptionHandler(InvalidCommentException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    String invalidCommentHandler(InvalidCommentException ex) {
         return ex.getMessage();
     }
 }

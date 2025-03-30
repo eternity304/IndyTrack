@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
 
@@ -52,10 +51,10 @@ public class Course {
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
-    private List<Rating> ratings = new ArrayList<>();
+    private List<Review> reviews = new ArrayList<>();
 
     @Column(name = "average_rating")
-    private Double averageRating;
+    private Double averageRating = 0.0;
 
     @Column(name = "rating_count")
     private Integer ratingCount = 0;
@@ -99,6 +98,10 @@ public class Course {
         }
         double totalRating = this.averageRating * this.ratingCount - existingRating;
         this.ratingCount--;
-        this.averageRating = Math.round((totalRating / this.ratingCount) * 100.0) / 100.0;
+        if (this.ratingCount == 0) {
+            this.averageRating = 0.0;
+        } else {
+            this.averageRating = Math.round((totalRating / this.ratingCount) * 100.0) / 100.0;
+        }
     }
 }
