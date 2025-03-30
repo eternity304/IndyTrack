@@ -2,6 +2,7 @@ package com.inde.indytrack.model;
 
 import java.io.Serializable;
 
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
 import lombok.AllArgsConstructor;
@@ -15,7 +16,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ReviewKey implements Serializable {
+    @Column(name = "course_code")
     private String courseCode;
+    @Column(name = "student_id")
     private Long studentId;
 
     @Override

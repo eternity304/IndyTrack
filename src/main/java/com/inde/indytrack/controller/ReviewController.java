@@ -69,8 +69,8 @@ public class ReviewController {
         return course.getAverageRating();
     }
 
-    @PostMapping
-    public Review createReview(@RequestBody ReviewDTO reviewDto) {
+    @PostMapping("/{courseCode}/{studentId}")
+    public Review createReview(@PathVariable String courseCode, @PathVariable Long studentId, @RequestBody ReviewDTO reviewDto) {
         if (reviewDto.getRating() < 1 || reviewDto.getRating() > 5) {
             throw new InvalidRatingException();
         }

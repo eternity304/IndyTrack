@@ -109,9 +109,12 @@ INSERT INTO semester_courses_list (semester_id, course_code) VALUES
 (10, 'MIE236H1'),  -- Fall2024 courses
 (11, 'MIE237H1');  -- Winter2025 courses
 
--- Insert comments
-INSERT INTO comments (student_id, course_code, comment_number, body) VALUES (5555, 'MIE236H1', 1, 'A comment');
-INSERT INTO comments (student_id, course_code, comment_number, body) VALUES (4444, 'MIE237H1', 1, 'A bad comment');
+-- Insert reviews
+INSERT INTO reviews (course_code, student_id, rating, comment, upload_time) VALUES 
+('MIE236H1', 5555, 5, 'A good comment', '2025-02-19T14:30:15.123'), 
+('MIE237H1', 5555, 4, 'A good comment', '2025-02-19T08:45:30.456789'), 
+('MIE236H1', 4444, 3, 'A bad comment', '2025-02-19T23:59:59'), 
+('MIE237H1', 4444, 2, 'A bad comment', '2023-08-25T12:00:00');
 
 -- Insert course_academic_focus
 INSERT INTO course_academic_focus (course_code, academic_focus) VALUES 
@@ -127,11 +130,3 @@ INSERT INTO course_academic_focus (course_code, academic_focus) VALUES
 ('MIE368H1', 'IE'), 
 ('MIE344H1', 'HF'), 
 ('MIE345H1', 'HF');
-
--- Insert ratings
-INSERT INTO ratings (course_code, student_id, rating_value) VALUES 
-('MIE368H1', 1111, 5), 
-('MIE370H1', 1111, 4), 
-('MIE369H1', 1111, 5), 
-('MIE363H1', 1111, 5), 
-('MIE245H1', 1111, 3);
