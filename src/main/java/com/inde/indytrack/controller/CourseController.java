@@ -10,7 +10,9 @@ import com.inde.indytrack.repository.CourseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @CrossOrigin
 @RestController
@@ -34,14 +36,32 @@ public class CourseController {
                 .orElseThrow(() -> new CourseNotFoundException(courseCode));
     }
 
+    @GetMapping("/{code}/skule-url")
+    public String getSkuleUrl(@PathVariable("code") String courseCode) {
+        return repository.findById(courseCode)
+                .map(Course::getSkuleUrl)
+                .orElseThrow(() -> new CourseNotFoundException(courseCode));
+    }
+
     // Helper function to update the course with the given DTO
     private void updateCourseWithDTO(Course course, CourseDTO dto) {
-
+        course.setCode(dto.getCode());
         course.setName(dto.getName());
         course.setDescription(dto.getDescription());
         course.setCourseType(dto.getCourseType());
         course.setCreditValue(dto.getCreditValue());
         course.setAcademicFocus(dto.getAcademicFocus());
+        
+        // Handle prerequisites
+        if (dto.getPrerequisiteCodes() != null) {
+            Set<Course> prerequisites = new HashSet<>();
+            for (String prereqCode : dto.getPrerequisiteCodes()) {
+                Course prerequisite = repository.findById(prereqCode)
+                    .orElseThrow(() -> new CourseNotFoundException(prereqCode));
+                prerequisites.add(prerequisite);
+            }
+            course.setPrerequisites(prerequisites);
+        }
     }
 
     @PostMapping

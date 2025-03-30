@@ -98,6 +98,14 @@ INSERT INTO courses(code, name, course_type, credit_value, description) VALUES
 INSERT INTO courses(code, name, course_type, credit_value, description) VALUES 
 ('JRE420H1', 'People Management and Organizational Behaviour', 'HSS', 0.5, 'Spans three inter-related topics within organizational behavior and human resources: individual behaviour, group behaviour, and leadership. It provides students with both the theory and practice of how to work, lead, and thrive in organizations. Topics include theories of personality, learning, power, decision making, ethics, culture, leadership, teamwork, and motivation. These topics are taught in three ways: Case studies, role play & simulation exercises followed by class discussion, Surveys of Personality & Skills, Lectures, discussions, and readings based on the current research on the topic');
 
+-- Insert course_prerequisites
+INSERT INTO course_prerequisites (course_code, prerequisite_code) VALUES 
+('MIE223H1','APS106H1'), 
+('MIE223H1', 'MIE236H1'), 
+('MIE237H1', 'MIE236H1'), 
+('MIE240H1', 'MIE242H1'), 
+('MIE263H1', 'MIE262H1');
+
 -- Insert course_plans
 INSERT INTO course_plans (student_id) VALUES (1111);
 
