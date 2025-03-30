@@ -4,6 +4,7 @@ import com.inde.indytrack.dto.CoursePlanDTO;
 import com.inde.indytrack.exception.CourseNotFoundException;
 import com.inde.indytrack.exception.CoursePlanNotFoundException;
 import com.inde.indytrack.exception.InvalidSemesterException;
+import com.inde.indytrack.exception.SemesterFullException;
 import com.inde.indytrack.exception.SemesterNotFoundException;
 import com.inde.indytrack.exception.StudentNotFoundException;
 import com.inde.indytrack.model.CoursePlan;
@@ -148,6 +149,10 @@ public class CoursePlanController {
         }
 
         SemesterCourses semesterCourses = findSemesterCourses(coursePlan, semester, planId);
+
+        if (semesterCourses.getCourses().size() >= 6) {
+            throw new SemesterFullException(semester);
+        }
 
         if (!semesterCourses.getCourses().contains(courseId)) {
             semesterCourses.getCourses().add(courseId);
