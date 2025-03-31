@@ -26,29 +26,59 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     boolean existsByEmail(@Param("email") String email);
 
     @Query(
-        value = "SELECT m.name as minorName, SUM(c.credit_value) as creditsEarned, ROUND(SUM(c.credit_value) / 3.0 * 100, 2) as percentageCompleted " + 
-                "FROM courses c " + 
-                "INNER JOIN course_minors cm ON c.code = cm.course_code " + 
-                "INNER JOIN minors m ON cm.minor_name = m.name " + 
-                "INNER JOIN semester_courses_list scl ON c.code = scl.course_code " + 
-                "INNER JOIN semester_courses sc ON scl.semester_id = sc.id " + 
-                "INNER JOIN course_plans cp ON sc.course_plan_id = cp.id " + 
-                "WHERE cp.student_id = :studentId AND LOWER(m.name) LIKE LOWER(CONCAT('%', :minorName, '%'))", 
-                nativeQuery = true
-    ) 
-    MinorProgressDTO findIntendedMinorProgress(@Param("studentId") Long studentId, @Param("minorName") String minorName);
-
-    @Query(
-        value = "SELECT m.name as minorName, SUM(c.credit_value) as creditsEarned, ROUND(SUM(c.credit_value) / 3.0 * 100, 2) as percentageCompleted " + 
-                "FROM courses c " + 
-                "INNER JOIN course_minors cm ON c.code = cm.course_code " +
-                "INNER JOIN minors m ON cm.minor_name = m.name " + 
-                "INNER JOIN semester_courses_list scl ON c.code = scl.course_code " + 
-                "INNER JOIN semester_courses sc ON scl.semester_id = sc.id " +
-                "INNER JOIN course_plans cp ON sc.course_plan_id = cp.id " +
-                "WHERE cp.student_id = :studentId " +
-                "GROUP BY m.name HAVING SUM(c.credit_value) >= 1.5", 
+        value = "WITH student_courses AS ( " +
+                "    SELECT DISTINCT scl.course_code " +
+                "    FROM course_plans cp " +
+                "    JOIN semester_courses sc ON cp.id = sc.course_plan_id " +
+                "    JOIN semester_courses_list scl ON sc.id = scl.semester_id " +
+                "    WHERE cp.student_id = :studentId " +
+                ") " +
+                "SELECT m.name AS minorName, " +
+                "COALESCE(SUM(DISTINCT CASE " +
+                "    WHEN sc.course_code IS NOT NULL THEN c.credit_value " +
+                "    ELSE 0.0 " +
+                "END), 0.0) AS creditsEarned, " +
+                "ROUND(COALESCE(SUM(DISTINCT CASE " +
+                "    WHEN sc.course_code IS NOT NULL THEN c.credit_value " +
+                "    ELSE 0.0 " +
+                "END), 0.0) / 3.0 * 100, 2) AS percentageCompleted " +
+                "FROM student_intended_minors sim " +
+                "JOIN minors m ON m.name = sim.minor_name " +
+                "LEFT JOIN minor_requirements mr ON m.name = mr.minor_name " +
+                "LEFT JOIN minor_requirement_courses mrc ON mr.id = mrc.minor_requirement_id " +
+                "LEFT JOIN courses c ON mrc.course_code = c.code " +
+                "LEFT JOIN student_courses sc ON c.code = sc.course_code " +
+                "WHERE sim.student_id = :studentId " +
+                "GROUP BY m.name",
         nativeQuery = true
     ) 
-    List<MinorProgressDTO> findSuggestedMinorsProgress(@Param("studentId") Long studentId);
+    List<MinorProgressDTO> findIntendedMinorsProgress(@Param("studentId") Long studentId);
+
+    @Query(
+        value = "WITH student_courses AS ( " +
+                "    SELECT DISTINCT scl.course_code " +
+                "    FROM course_plans cp " +
+                "    JOIN semester_courses sc ON cp.id = sc.course_plan_id " +
+                "    JOIN semester_courses_list scl ON sc.id = scl.semester_id " +
+                "    WHERE cp.student_id = :studentId " +
+                ") " +
+                "SELECT m.name AS minorName, " +
+                "COALESCE(SUM(DISTINCT CASE " +
+                "    WHEN sc.course_code IS NOT NULL THEN c.credit_value " +
+                "    ELSE 0.0 " +
+                "END), 0.0) AS creditsEarned, " +
+                "ROUND(COALESCE(SUM(DISTINCT CASE " +
+                "    WHEN sc.course_code IS NOT NULL THEN c.credit_value " +
+                "    ELSE 0.0 " +
+                "END), 0.0) / 3.0 * 100, 2) AS percentageCompleted " +
+                "FROM minors m " +
+                "LEFT JOIN minor_requirements mr ON m.name = mr.minor_name " +
+                "LEFT JOIN minor_requirement_courses mrc ON mr.id = mrc.minor_requirement_id " +
+                "LEFT JOIN courses c ON mrc.course_code = c.code " +
+                "LEFT JOIN student_courses sc ON c.code = sc.course_code " +
+                "WHERE m.name = :minorName " +
+                "GROUP BY m.name",
+        nativeQuery = true
+    ) 
+    MinorProgressDTO findSpecificMinorProgress(@Param("studentId") Long studentId, @Param("minorName") String minorName);
 }
