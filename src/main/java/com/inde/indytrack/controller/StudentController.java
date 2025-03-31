@@ -25,19 +25,19 @@ import java.util.stream.Collectors;
 @RequestMapping("/students")
 public class StudentController {
     @Autowired
-    private final StudentRepository repository;
+    private final StudentRepository studentRepository;
 
     @Autowired
     private final MinorRepository minorRepository;
 
-    public StudentController(StudentRepository repository, MinorRepository minorRepository) {
-        this.repository = repository;
+    public StudentController(StudentRepository studentRepository, MinorRepository minorRepository) {
+        this.studentRepository = studentRepository;
         this.minorRepository = minorRepository;
     }
 
     @GetMapping
     public List<StudentDTO> retrieveAllStudents() {
-        return repository.findAll()
+        return studentRepository.findAll()
                 .stream()
                 .map(this::convertStudentToDTO)
                 .collect(Collectors.toList());
@@ -45,14 +45,14 @@ public class StudentController {
 
     @GetMapping("/{id}")
     public StudentDTO retrieveStudent(@PathVariable("id") Long studentId) {
-        Student student = repository.findById(studentId)
+        Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new StudentNotFoundException(studentId));
         return convertStudentToDTO(student);
     }
 
     @PostMapping
     public StudentDTO createStudent(@RequestBody RegisterDTO newStudent) {
-        if (repository.findByEmail(newStudent.getEmail()) != null) {
+        if (studentRepository.findByEmail(newStudent.getEmail()) != null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email is already in use");
         }
         Student student = new Student();
@@ -60,7 +60,7 @@ public class StudentController {
         student.setLastName(newStudent.getLastName());
         student.setEmail(newStudent.getEmail());
         student.setPassword(newStudent.getPassword());
-        Student savedStudent = repository.save(student);
+        Student savedStudent = studentRepository.save(student);
         return convertStudentToDTO(savedStudent);
     }
 
@@ -81,7 +81,7 @@ public class StudentController {
 
     @PutMapping("/{id}")
     public StudentDTO updateStudent(@RequestBody StudentDTO updatedStudent, @PathVariable("id") Long studentId) {
-        return repository.findById(studentId)
+        return studentRepository.findById(studentId)
                 .map(student -> {
                     student.setFirstName(updatedStudent.getFirstName());
                     student.setLastName(updatedStudent.getLastName());
@@ -99,7 +99,7 @@ public class StudentController {
                         }
                     student.setIntendedMinors(minors);
                 }
-                    Student savedStudent = repository.save(student);
+                    Student savedStudent = studentRepository.save(student);
                     return convertStudentToDTO(savedStudent);
                 })
                 .orElseThrow(() -> new StudentNotFoundException(studentId));
@@ -107,21 +107,21 @@ public class StudentController {
 
     @DeleteMapping("/{id}")
     public void deleteStudent(@PathVariable("id") Long studentId) {
-        if (!repository.existsById(studentId)) {
+        if (!studentRepository.existsById(studentId)) {
             throw new StudentNotFoundException(studentId);
         }
-        repository.deleteById(studentId);
+        studentRepository.deleteById(studentId);
     }
 
     @GetMapping("names/{name}")
     public List<StudentDTO> retrieveStudentByName(@PathVariable("name") String name) {
-        return repository.findByFirstOrLastName(name).stream().map(this::convertStudentToDTO).collect(Collectors.toList());
+        return studentRepository.findByFirstOrLastName(name).stream().map(this::convertStudentToDTO).collect(Collectors.toList());
     }
 
     // Get intended minors for a student
     @GetMapping("/{studentId}/intended-minors")
     public Set<Minor> getIntendedMinors(@PathVariable Long studentId) {
-        Student student = repository.findById(studentId)
+        Student student = studentRepository.findById(studentId)
             .orElseThrow(() -> new StudentNotFoundException(studentId));
         return student.getIntendedMinors();
     }
@@ -131,7 +131,7 @@ public class StudentController {
     public StudentDTO addIntendedMinor(
             @PathVariable Long studentId,
             @PathVariable String minorName) {
-        Student student = repository.findById(studentId)
+        Student student = studentRepository.findById(studentId)
             .orElseThrow(() -> new StudentNotFoundException(studentId));
             
         Minor minor = minorRepository.findByName(minorName);
@@ -140,14 +140,14 @@ public class StudentController {
         }
 
         student.getIntendedMinors().add(minor);
-        Student savedStudent = repository.save(student);
+        Student savedStudent = studentRepository.save(student);
         return convertStudentToDTO(savedStudent);
     }
 
     // Remove an intended minor
     @DeleteMapping("/{studentId}/intended-minors/{minorName}")
     public StudentDTO removeIntendedMinor(@PathVariable Long studentId, @PathVariable String minorName) {
-        Student student = repository.findById(studentId)
+        Student student = studentRepository.findById(studentId)
             .orElseThrow(() -> new StudentNotFoundException(studentId));
             
         Minor minor = minorRepository.findByName(minorName);
@@ -162,7 +162,7 @@ public class StudentController {
             );
         }
 
-        Student savedStudent = repository.save(student);
+        Student savedStudent = studentRepository.save(student);
         return convertStudentToDTO(savedStudent);
     }
 
@@ -171,7 +171,7 @@ public class StudentController {
     public StudentDTO updateIntendedMinors(
             @PathVariable Long studentId,
             @RequestBody Set<String> minorNames) {
-        Student student = repository.findById(studentId)
+        Student student = studentRepository.findById(studentId)
             .orElseThrow(() -> new StudentNotFoundException(studentId));
 
         Set<Minor> minors = new HashSet<>();
@@ -184,35 +184,27 @@ public class StudentController {
         }
 
         student.setIntendedMinors(minors);
-        Student savedStudent = repository.save(student);
+        Student savedStudent = studentRepository.save(student);
         return convertStudentToDTO(savedStudent);
     }
 
     // Get progress for all intended minors
     @GetMapping("/{studentId}/intended-minors/progress")
-    public List<MinorProgressDTO> getIntendedMinorsProgress(@PathVariable Long studentId) {
-        if (!repository.existsById(studentId)) {
+    public List<MinorProgressDTO> retrieveAllIntendedMinorsProgress(@PathVariable Long studentId) {
+        if (!studentRepository.existsById(studentId)) {
             throw new StudentNotFoundException(studentId);
         }
-        return repository.findSuggestedMinorsProgress(studentId);
+        return studentRepository.findIntendedMinorsProgress(studentId);
     }
 
     // Get progress for a specific intended minor
     @GetMapping("/{studentId}/intended-minors/{minorName}/progress")
-    public MinorProgressDTO getSpecificMinorProgress(
-            @PathVariable Long studentId,
-            @PathVariable String minorName) {
-        if (!repository.existsById(studentId)) {
-            throw new StudentNotFoundException(studentId);
+    public MinorProgressDTO retrieveIntendedMinorProgress(@PathVariable Long studentId, @PathVariable String minorName) {
+        Student student = studentRepository.findById(studentId)
+            .orElseThrow(() -> new StudentNotFoundException(studentId));
+        if (!student.getIntendedMinors().stream().anyMatch(m -> m.getName().equals(minorName))) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Student is not enrolled in the  " + minorName + " minor");
         }
-        
-        MinorProgressDTO progress = repository.findIntendedMinorProgress(studentId, minorName);
-        if (progress == null) {
-            throw new ResponseStatusException(
-                HttpStatus.NOT_FOUND,
-                "No progress found for minor: " + minorName
-            );
-        }
-        return progress;
+        return studentRepository.findSpecificMinorProgress(studentId, minorName);
     }
 }

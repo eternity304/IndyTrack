@@ -125,7 +125,7 @@ INSERT INTO semester_courses_list (semester_id, course_code) VALUES
 (11, 'APS360H1'),  
 (12, 'MIE354H1'), 
 (12, 'MIE344H1'), 
-(13, 'MIE368H1'), 
+(13, 'JRE410H1'), 
 (13, 'MIE451H1');
 
 -- Insert reviews
