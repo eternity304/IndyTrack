@@ -44,6 +44,6 @@ public class Review {
     @Column(length = 1000)
     private String comment;
 
-    @Column(name = "upload_time", insertable = false, updatable = false)
+    @Column(name = "upload_time")
     private String uploadTime;
 }
