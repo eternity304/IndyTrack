@@ -1,5 +1,7 @@
 package com.inde.indytrack.dto;
 
+import java.util.Set;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,4 +13,5 @@ public class StudentDTO {
     private String lastName;
     private String email;
     private String password;
+    private Set<String> intendedMinorNames;
 }

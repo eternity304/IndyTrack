@@ -18,21 +18,23 @@ public interface CourseRepository extends JpaRepository<Course, String>, JpaSpec
         value = "SELECT * FROM courses c " + 
                 "WHERE LOWER(c.code) LIKE LOWER(CONCAT(:code, '%'))",
                 nativeQuery = true
-    ) public Course findByCode(@Param("code") String code);
+    )
+    Course findByCode(@Param("code") String code);
 
-    public List<Course> findByName(String name);
+    List<Course> findByName(String name);
 
-    public List<Course> findByCourseType(@Param("courseType") CourseType courseType);
+    List<Course> findByCourseType(@Param("courseType") CourseType courseType);
 
-    public List<Course> findByCreditValue(@Param("creditValue") Long creditValue);
+    List<Course> findByCreditValue(@Param("creditValue") Long creditValue);
 
-    public List<Course> findByAcademicFocus(@Param("academicFocus") AcademicFocus academicFocus);
+    List<Course> findByAcademicFocus(@Param("academicFocus") AcademicFocus academicFocus);
 
     @Query(
         value = "SELECT * FROM courses c " + 
                 "WHERE (:level REGEXP_LIKE(c.code, CONCAT('^[A-Z]+', CAST(:level/100 AS VARCHAR))))",
                 nativeQuery = true
-    ) public List<Course> findByLevel(@Param("level") Integer level);
+    )
+    List<Course> findByLevel(@Param("level") Integer level);
 
     @Query(
         value = "SELECT * FROM courses c " +
@@ -44,7 +46,7 @@ public interface CourseRepository extends JpaRepository<Course, String>, JpaSpec
                 "     WHERE caf.course_code = c.code AND caf.academic_focus = :academicFocus)) " +
                 "AND (:level IS NULL OR REGEXP_LIKE(c.code, CONCAT('^[A-Z]+', CAST(CASE WHEN :level IS NULL THEN NULL ELSE :level/100 END AS VARCHAR))))",
             nativeQuery = true
-        )
+    )
     List<Course> searchCourses(
         @Param("code") String code,
         @Param("name") String name,

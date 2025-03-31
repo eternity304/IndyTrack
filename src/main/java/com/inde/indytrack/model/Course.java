@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Entity
 @NoArgsConstructor
@@ -59,7 +60,7 @@ public class Course {
     @Column(name = "rating_count")
     private Integer ratingCount = 0;
 
-    @Transient  // This annotation means the field won't be stored in the database
+    @Transient
     public String getSkuleUrl() {
         return "https://courses.skule.ca/course/" + this.code;
     }
@@ -72,9 +73,20 @@ public class Course {
     )
     private Set<Course> prerequisites = new HashSet<>();
 
-    @ManyToMany(mappedBy = "prerequisites")
+    @ManyToMany(mappedBy = "prerequisites")      
     @JsonIgnore
     private Set<Course> isPrerequisiteFor = new HashSet<>();
+
+    @ManyToMany(mappedBy = "courses")
+    @JsonIgnore
+    private Set<MinorRequirement> minorRequirements = new HashSet<>();
+
+    @Transient
+    public Set<String> getMinorNames() {
+        return minorRequirements.stream()
+            .map(req -> req.getMinor().getName())
+            .collect(Collectors.toSet());
+    }
 
     public Course(
         String code, 

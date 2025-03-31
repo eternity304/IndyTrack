@@ -36,13 +36,6 @@ public class CourseController {
                 .orElseThrow(() -> new CourseNotFoundException(courseCode));
     }
 
-    @GetMapping("/{code}/skule-url")
-    public String getSkuleUrl(@PathVariable("code") String courseCode) {
-        return repository.findById(courseCode)
-                .map(Course::getSkuleUrl)
-                .orElseThrow(() -> new CourseNotFoundException(courseCode));
-    }
-
     // Helper function to update the course with the given DTO
     private void updateCourseWithDTO(Course course, CourseDTO dto) {
         course.setCode(dto.getCode());

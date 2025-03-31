@@ -110,12 +110,23 @@ INSERT INTO course_prerequisites (course_code, prerequisite_code) VALUES
 INSERT INTO course_plans (student_id) VALUES (1111);
 
 -- Insert semesters into course_plans
-INSERT INTO semester_courses (id, semester, course_plan_id) VALUES (10, 'Fall2024', 1), (11, 'Winter2025', 1);
+INSERT INTO semester_courses (id, semester, course_plan_id) VALUES 
+(10, 'Fall2023', 1), 
+(11, 'Winter2024', 1), 
+(12, 'Fall2024', 1), 
+(13, 'Winter2025', 1);
 
 -- Insert courses into corresponding semester
-INSERT INTO semester_courses_list (semester_id, course_code) VALUES
-(10, 'MIE236H1'),  -- Fall2024 courses
-(11, 'MIE237H1');  -- Winter2025 courses
+INSERT INTO semester_courses_list (semester_id, course_code) VALUES 
+(10, 'MIE236H1'), 
+(10, 'MIE368H1'), 
+(11, 'MIE237H1'), 
+(11, 'MIE369H1'),
+(11, 'APS360H1'),  
+(12, 'MIE354H1'), 
+(12, 'MIE344H1'), 
+(13, 'MIE368H1'), 
+(13, 'MIE451H1');
 
 -- Insert reviews
 INSERT INTO reviews (course_code, student_id, rating, comment, upload_time) VALUES 
@@ -138,3 +149,45 @@ INSERT INTO course_academic_focus (course_code, academic_focus) VALUES
 ('MIE368H1', 'IE'), 
 ('MIE344H1', 'HF'), 
 ('MIE345H1', 'HF');
+
+-- Insert minors
+INSERT INTO minors (name) VALUES 
+('Advanced Manufacturing'), 
+('Artificial Intelligence Engineering'), 
+('Bioengineering'), 
+('Biomedical Engineering'), 
+('Engineering Business'), 
+('Environmental Engineering'), 
+('Global Leadership'), 
+('Music Performance'), 
+('Nanoengineering'), 
+('Robotics & Mechatronics'), 
+('Sustainable Energy');
+
+-- Insert minor_requirements
+INSERT INTO minor_requirements (minor_name, required_credits) VALUES 
+('Artificial Intelligence Engineering', 0.5), 
+('Artificial Intelligence Engineering', 0.5), 
+('Artificial Intelligence Engineering', 0.5), 
+('Artificial Intelligence Engineering', 0.5), 
+('Artificial Intelligence Engineering', 1.0);
+
+-- Insert minor_requirement_courses
+INSERT INTO minor_requirement_courses (minor_requirement_id, course_code) VALUES 
+(1, 'APS360H1'), 
+(2, 'MIE245H1'), 
+(3, 'MIE369H1'), 
+(3, 'CSC384H1'), 
+(4, 'MIE424H1'), 
+(5, 'MIE368H1'), 
+(5, 'MIE451H1'), 
+(5, 'MIE457H1'), 
+(5, 'MIE524H1'), 
+(5, 'MIE562H1'), 
+(5, 'MIE566H1'), 
+(5, 'MIE567H1');
+
+-- Insert student_intended_minors
+INSERT INTO student_intended_minors (student_id, minor_name) VALUES 
+(1111, 'Artificial Intelligence Engineering'), 
+(1111, 'Engineering Business');
