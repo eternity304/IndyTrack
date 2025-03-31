@@ -4,12 +4,14 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.inde.indytrack.dto.ReviewDTO;
 import com.inde.indytrack.exception.CourseNotFoundException;
@@ -58,6 +60,15 @@ public class ReviewController {
         List<Review> reviews = reviewRepository.findLatestReviewsByCourseCode(courseCode);
         if (reviews.isEmpty()) {
             throw new ReviewNotFoundException(courseCode);
+        }
+        return reviews;
+    }
+
+    @GetMapping("/{studentId}")
+    public List<Review> retrieveReviewsByStudent(@PathVariable Long studentId) {
+        List<Review> reviews = reviewRepository.findByStudentId(studentId);
+        if (reviews.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No reviews found for student with ID: " + studentId);
         }
         return reviews;
     }

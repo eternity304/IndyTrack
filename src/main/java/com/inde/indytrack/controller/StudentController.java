@@ -120,7 +120,7 @@ public class StudentController {
 
     // Get intended minors for a student
     @GetMapping("/{studentId}/intended-minors")
-    public Set<Minor> getIntendedMinors(@PathVariable Long studentId) {
+    public Set<Minor> getIntendedMinors(@PathVariable("studentId") Long studentId) {
         Student student = studentRepository.findById(studentId)
             .orElseThrow(() -> new StudentNotFoundException(studentId));
         return student.getIntendedMinors();
@@ -128,9 +128,7 @@ public class StudentController {
 
     // Add an intended minor
     @PutMapping("/{studentId}/intended-minors/{minorName}")
-    public StudentDTO addIntendedMinor(
-            @PathVariable Long studentId,
-            @PathVariable String minorName) {
+    public StudentDTO addIntendedMinor(@PathVariable("studentId") Long studentId, @PathVariable("minorName") String minorName) {
         Student student = studentRepository.findById(studentId)
             .orElseThrow(() -> new StudentNotFoundException(studentId));
             
@@ -146,7 +144,7 @@ public class StudentController {
 
     // Remove an intended minor
     @DeleteMapping("/{studentId}/intended-minors/{minorName}")
-    public StudentDTO removeIntendedMinor(@PathVariable Long studentId, @PathVariable String minorName) {
+    public StudentDTO removeIntendedMinor(@PathVariable("studentId") Long studentId, @PathVariable("minorName") String minorName) {
         Student student = studentRepository.findById(studentId)
             .orElseThrow(() -> new StudentNotFoundException(studentId));
             
@@ -168,9 +166,7 @@ public class StudentController {
 
     // Update all intended minors at once
     @PutMapping("/{studentId}/intended-minors")
-    public StudentDTO updateIntendedMinors(
-            @PathVariable Long studentId,
-            @RequestBody Set<String> minorNames) {
+    public StudentDTO updateIntendedMinors(@PathVariable("studentId") Long studentId, @RequestBody Set<String> minorNames) {
         Student student = studentRepository.findById(studentId)
             .orElseThrow(() -> new StudentNotFoundException(studentId));
 
@@ -190,7 +186,7 @@ public class StudentController {
 
     // Get progress for all intended minors
     @GetMapping("/{studentId}/intended-minors/progress")
-    public List<MinorProgressDTO> retrieveAllIntendedMinorsProgress(@PathVariable Long studentId) {
+    public List<MinorProgressDTO> retrieveAllIntendedMinorsProgress(@PathVariable("studentId") Long studentId) {
         if (!studentRepository.existsById(studentId)) {
             throw new StudentNotFoundException(studentId);
         }
