@@ -4,14 +4,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.inde.indytrack.dto.ReviewDTO;
 import com.inde.indytrack.exception.CourseNotFoundException;
@@ -55,29 +53,34 @@ public class ReviewController {
         return reviewRepository.findAll();
     }
 
-    @GetMapping("/{courseCode}")
+    @GetMapping("/courses/{courseCode}")
     public List<Review> retrieveReviewsByCourse(@PathVariable String courseCode) {
-        List<Review> reviews = reviewRepository.findLatestReviewsByCourseCode(courseCode);
-        if (reviews.isEmpty()) {
-            throw new ReviewNotFoundException(courseCode);
+        if (!courseRepository.existsById(courseCode)) {
+            throw new CourseNotFoundException(courseCode);
         }
-        return reviews;
+        return reviewRepository.findByCourseCode(courseCode);
     }
 
-    @GetMapping("/{studentId}")
+    @GetMapping("/students/{studentId}")
     public List<Review> retrieveReviewsByStudent(@PathVariable Long studentId) {
-        List<Review> reviews = reviewRepository.findByStudentId(studentId);
-        if (reviews.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No reviews found for student with ID: " + studentId);
+        if (!studentRepository.existsById(studentId)) {
+            throw new StudentNotFoundException(studentId);
         }
-        return reviews;
+        return reviewRepository.findByStudentId(studentId);
+    }
+
+    @GetMapping("/{courseCode}/{studentId}")
+    public Review retrieveReview(@PathVariable String courseCode, @PathVariable Long studentId) {
+        return reviewRepository.findById(new ReviewKey(courseCode, studentId))
+            .orElseThrow(() -> new ReviewNotFoundException(courseCode, studentId));
     }
 
     @GetMapping("/{courseCode}/average-rating")
     public Double retrieveAverageRating(@PathVariable String courseCode) {
-        Course course = courseRepository.findById(courseCode)
-            .orElseThrow(() -> new CourseNotFoundException(courseCode));
-        return course.getAverageRating();
+        if (!courseRepository.existsById(courseCode)) {
+            throw new CourseNotFoundException(courseCode);
+        }
+        return courseRepository.calculateAverageRating(courseCode);
     }
 
     @PostMapping("/{courseCode}/{studentId}")
@@ -92,6 +95,7 @@ public class ReviewController {
             .orElseThrow(() -> new CourseNotFoundException(reviewDto.getCourseCode()));
         Student student = studentRepository.findById(reviewDto.getStudentId())
             .orElseThrow(() -> new StudentNotFoundException(reviewDto.getStudentId()));
+        
         Review review = new Review();
         review.setId(new ReviewKey(course.getCode(), student.getId()));
         review.setCourse(course);
@@ -99,8 +103,7 @@ public class ReviewController {
         review.setRating(reviewDto.getRating());
         review.setComment(reviewDto.getComment());
         review.setUploadTime(LocalDateTime.now().toString());
-        course.updateAverageRating(reviewDto.getRating());
-        courseRepository.save(course);
+
         return reviewRepository.save(review);
     }
 
@@ -118,13 +121,11 @@ public class ReviewController {
         if (reviewDto.getComment() != null && (reviewDto.getComment().isEmpty())) {
             throw new InvalidCommentException();
         }
-        Course course = review.getCourse();
-        course.removeRating(review.getRating());
-        course.updateAverageRating(reviewDto.getRating());
-        courseRepository.save(course);
+
         review.setRating(reviewDto.getRating());
         review.setComment(reviewDto.getComment());
         review.setUploadTime(LocalDateTime.now().toString());
+
         return reviewRepository.save(review);
     }
 
@@ -132,9 +133,7 @@ public class ReviewController {
     public void deleteReview(@PathVariable String courseCode, @PathVariable Long studentId) {
         Review review = reviewRepository.findById(new ReviewKey(courseCode, studentId))
             .orElseThrow(() -> new ReviewNotFoundException(courseCode, studentId));
-        Course course = review.getCourse();
-        course.removeRating(review.getRating());
-        courseRepository.save(course);
+
         reviewRepository.delete(review);
     }
 }

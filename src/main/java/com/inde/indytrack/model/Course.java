@@ -10,7 +10,6 @@ import javax.validation.constraints.NotEmpty;
 import org.springframework.lang.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.inde.indytrack.exception.InvalidRatingException;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -53,12 +52,6 @@ public class Course {
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<Review> reviews = new ArrayList<>();
-
-    @Column(name = "average_rating")
-    private Double averageRating = 0.0;
-
-    @Column(name = "rating_count")
-    private Integer ratingCount = 0;
 
     @Transient
     public String getSkuleUrl() {
@@ -103,36 +96,6 @@ public class Course {
         this.courseType = courseType;
         this.creditValue = creditValue;
         this.academicFocus = academicFocus != null ? academicFocus : new HashSet<>();
-        this.averageRating = 0.0;
-        this.ratingCount = 0;
         this.prerequisites = prerequisites;
-    }
-
-    public void updateAverageRating(Integer newRating) {
-        if (newRating < 1 || newRating > 5) {
-            throw new InvalidRatingException();
-        }
-        if (this.averageRating == null) {
-            this.averageRating = 0.0;
-        }
-        if (this.ratingCount == null) {
-            this.ratingCount = 0;
-        }
-        double totalRating = this.averageRating * this.ratingCount + newRating;
-        this.ratingCount++;
-        this.averageRating = Math.round((totalRating / this.ratingCount) * 100.0) / 100.0;
-    }
-
-    public void removeRating(Integer existingRating) {
-        if (this.ratingCount <= 0) {
-            throw new IllegalStateException("No ratings to remove");
-        }
-        double totalRating = this.averageRating * this.ratingCount - existingRating;
-        this.ratingCount--;
-        if (this.ratingCount == 0) {
-            this.averageRating = 0.0;
-        } else {
-            this.averageRating = Math.round((totalRating / this.ratingCount) * 100.0) / 100.0;
-        }
     }
 }
