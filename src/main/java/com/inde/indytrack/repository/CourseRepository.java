@@ -55,4 +55,18 @@ public interface CourseRepository extends JpaRepository<Course, String>, JpaSpec
         @Param("academicFocus") String academicFocus,
         @Param("level") Integer level
     );
+
+    @Query(
+        value = "SELECT COALESCE(ROUND(AVG(r.rating), 2), 0.0) FROM reviews r " + 
+                "WHERE r.course_code = :courseCode", 
+        nativeQuery = true
+    )
+    Double calculateAverageRating(@Param("courseCode") String courseCode);
+    
+    @Query(
+        value = "SELECT COUNT(*) FROM reviews r " + 
+                "WHERE r.course_code = :courseCode", 
+        nativeQuery = true
+    )
+    Integer calculateReviewCount(@Param("courseCode") String courseCode);
 }
