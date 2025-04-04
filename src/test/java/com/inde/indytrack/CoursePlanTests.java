@@ -1,6 +1,5 @@
 package com.inde.indytrack;
 
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -36,9 +35,6 @@ class CoursePlanTests {
 
     @Autowired
     private ObjectMapper objectMapper;
-
-    @Autowired
-    private CoursePlanRepository coursePlanRepository;
 
     @Test
     void getByStudent() throws Exception {

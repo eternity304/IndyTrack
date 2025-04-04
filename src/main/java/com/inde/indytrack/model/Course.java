@@ -106,15 +106,27 @@ public class Course {
         if (this.ratingCount == null) {
             this.ratingCount = 0;
         }
+
         double totalRating = this.averageRating * this.ratingCount + newRating;
         this.ratingCount++;
         this.averageRating = Math.round((totalRating / this.ratingCount) * 100.0) / 100.0;
     }
 
+
     public void removeRating(Integer existingRating) {
-        if (this.ratingCount <= 0) {
-            throw new IllegalStateException("No ratings to remove");
+        if (existingRating == null) return;
+
+        if (this.ratingCount == null) {
+            this.ratingCount = 0;
         }
+        if (this.averageRating == null) {
+            this.averageRating = 0.0;
+        }
+
+        if (this.ratingCount == 0) {
+            return;
+        }
+
         double totalRating = this.averageRating * this.ratingCount - existingRating;
         this.ratingCount--;
         if (this.ratingCount == 0) {
@@ -123,4 +135,6 @@ public class Course {
             this.averageRating = Math.round((totalRating / this.ratingCount) * 100.0) / 100.0;
         }
     }
+
+
 }

@@ -63,10 +63,21 @@ public class ReviewController {
     }
 
     @GetMapping("/{courseCode}/average-rating")
-    public Double retrieveAverageRating(@PathVariable String courseCode) {
+    public Double computeAverageRating(@PathVariable String courseCode) {
         Course course = courseRepository.findById(courseCode)
-            .orElseThrow(() -> new CourseNotFoundException(courseCode));
-        return course.getAverageRating();
+                .orElseThrow(() -> new CourseNotFoundException(courseCode));
+
+        List<Review> reviews = course.getReviews();
+
+        if (reviews.isEmpty()) return 0.0;
+
+        double avg = reviews.stream()
+                .filter(r -> r.getRating() != null)
+                .mapToInt(Review::getRating)
+                .average()
+                .orElse(0.0);
+
+        return avg * 100.0 / 100.0;
     }
 
     @PostMapping("/{courseCode}/{studentId}")
