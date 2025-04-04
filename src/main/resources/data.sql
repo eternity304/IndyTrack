@@ -110,12 +110,15 @@ INSERT INTO course_prerequisites (course_code, prerequisite_code) VALUES
 INSERT INTO course_plans (student_id) VALUES (1111);
 
 -- Insert semesters into course_plans
-INSERT INTO semester_courses (id, semester, course_plan_id) VALUES (10, 'Fall2024', 1), (11, 'Winter2025', 1);
+INSERT INTO semester_courses (id, semester, course_plan_id) VALUES (10, 'Fall2024', 1), (11, 'Winter2025', 1), (12, 'Summer2025',1);
 
 -- Insert courses into corresponding semester
 INSERT INTO semester_courses_list (semester_id, course_code) VALUES
 (10, 'MIE236H1'),  -- Fall2024 courses
-(11, 'MIE237H1');  -- Winter2025 courses
+(10, 'MIE567H1'),
+(11, 'MIE237H1'),  -- Winter2025 courses
+(11, 'MIE240H1'),
+(12, 'MIE363H1');  -- Summer2025 courses
 
 -- Insert reviews
 INSERT INTO reviews (course_code, student_id, rating, comment, upload_time) VALUES 
