@@ -30,6 +30,12 @@ public interface CourseRepository extends JpaRepository<Course, String>, JpaSpec
     List<Course> findByAcademicFocus(@Param("academicFocus") AcademicFocus academicFocus);
 
     @Query(
+        value = "DELETE FROM courses c WHERE LOWER(c.code) LIKE LOWER(:code)",
+        nativeQuery = true
+    )
+    void deleteByCode(@Param("code") String code);
+
+    @Query(
         value = "SELECT * FROM courses c " + 
                 "WHERE (:level REGEXP_LIKE(c.code, CONCAT('^[A-Z]+', CAST(:level/100 AS VARCHAR))))",
                 nativeQuery = true

@@ -120,10 +120,10 @@ public class StudentController {
 
     // Get intended minors for a student
     @GetMapping("/{studentId}/intended-minors")
-    public Set<Minor> getIntendedMinors(@PathVariable("studentId") Long studentId) {
+    public List<Minor> getIntendedMinors(@PathVariable("studentId") Long studentId) {
         Student student = studentRepository.findById(studentId)
             .orElseThrow(() -> new StudentNotFoundException(studentId));
-        return student.getIntendedMinors();
+        return student.getIntendedMinors().stream().collect(Collectors.toList());
     }
 
     // Add an intended minor

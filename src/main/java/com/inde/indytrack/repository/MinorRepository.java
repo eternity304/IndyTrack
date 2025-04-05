@@ -16,6 +16,12 @@ public interface MinorRepository extends JpaRepository<Minor, String> {
     Minor findByName(@Param("searchName") String searchName);
 
     @Query(
+        value = "DELETE FROM minors WHERE LOWER(name) LIKE LOWER(:minorName)",
+        nativeQuery = true
+    )
+    void deleteByName(@Param("minorName") String minorName);
+
+    @Query(
         value = "DELETE FROM student_intended_minors WHERE minor_name = :minorName",
         nativeQuery = true
     )
