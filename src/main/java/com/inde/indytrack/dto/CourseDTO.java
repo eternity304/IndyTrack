@@ -15,7 +15,7 @@ public class CourseDTO {
     private String name;
     private String description;
     private CourseType courseType;
-    private Long creditValue;
+    private Double creditValue;
     private Set<AcademicFocus> academicFocus;
     private Set<String> prerequisiteCodes;
 }

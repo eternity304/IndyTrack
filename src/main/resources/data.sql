@@ -1,15 +1,15 @@
 -- Insert students
 INSERT INTO users (id, first_name, last_name, email, password, user_type) VALUES
-(1111, 'Tyrion', 'Lannister', 'tyrion.lannister@mail.univ.ca', 'password', 'student'),
-(2222, 'Cersei', 'Lannister', 'cersei.lannister@mail.univ.ca', 'password', 'student'),
-(3333, 'Jaime', 'Lannister', 'jaime.lannister@mail.univ.ca', 'password', 'student'),
-(4444, 'Daenerys', 'Targaryen', 'jaime.targaryen@mail.univ.ca', 'password', 'student'),
-(5555, 'Jon', 'Snow', 'jon.snow@mail.univ.ca', 'password', 'student');
+(1111, 'Tyrion', 'Lannister', 'tyrion.lannister@mail.univ.ca', 'password1234', 'student'),
+(2222, 'Cersei', 'Lannister', 'cersei.lannister@mail.univ.ca', 'password1234', 'student'),
+(3333, 'Jaime', 'Lannister', 'jaime.lannister@mail.univ.ca', 'password1234', 'student'),
+(4444, 'Daenerys', 'Targaryen', 'daenerys.targaryen@mail.univ.ca', 'password1234', 'student'),
+(5555, 'Jon', 'Snow', 'jon.snow@mail.univ.ca', 'password1234', 'student');
 
 -- Insert admins
 INSERT INTO users (id, first_name, last_name, email, password, user_type) VALUES
-(6666, 'Varys', 'Varys', 'varys.varys@mail.univ.ca', 'password', 'admin'),
-(7777, 'Petyr', 'Baelish', 'petyr.baelish@mail.univ.ca', 'password', 'admin');
+(6666, 'Varys', 'Varys', 'varys.varys@mail.univ.ca', 'password1234', 'admin'),
+(7777, 'Petyr', 'Baelish', 'petyr.baelish@mail.univ.ca', 'password1234', 'admin');
 
 -- Insert core first year courses
 INSERT INTO courses(code, name, course_type, credit_value, description) VALUES
@@ -98,13 +98,72 @@ INSERT INTO courses(code, name, course_type, credit_value, description) VALUES
 INSERT INTO courses(code, name, course_type, credit_value, description) VALUES 
 ('JRE420H1', 'People Management and Organizational Behaviour', 'HSS', 0.5, 'Spans three inter-related topics within organizational behavior and human resources: individual behaviour, group behaviour, and leadership. It provides students with both the theory and practice of how to work, lead, and thrive in organizations. Topics include theories of personality, learning, power, decision making, ethics, culture, leadership, teamwork, and motivation. These topics are taught in three ways: Case studies, role play & simulation exercises followed by class discussion, Surveys of Personality & Skills, Lectures, discussions, and readings based on the current research on the topic');
 
--- Insert course_prerequisites
+-- Insert first and second year course prerequisites
 INSERT INTO course_prerequisites (course_code, prerequisite_code) VALUES 
+('MAT187H1', 'MAT186H1'), 
+('MIE250H1', 'APS106H1'), 
+('MIE262H1', 'MAT186H1'), 
+('MIE262H1', 'MAT187H1'), 
 ('MIE223H1','APS106H1'), 
 ('MIE223H1', 'MIE236H1'), 
 ('MIE237H1', 'MIE236H1'), 
 ('MIE240H1', 'MIE242H1'), 
-('MIE263H1', 'MIE262H1');
+('MIE245H1', 'MIE262H1'),  
+('MIE263H1', 'MIE236H1');
+
+-- Insert third year core course prerequisites
+INSERT INTO course_prerequisites (course_code, prerequisite_code) VALUES 
+('MIE353H1', 'MIE250H1'), 
+('MIE358H1', 'MIE236H1'), 
+('MIE360H1', 'MIE236H1'), 
+('MIE370H1', 'MIE236H1'), 
+('MIE370H1', 'MIE237H1'), 
+('MIE350H1', 'MIE353H1'), 
+('MIE359H1', 'APS111H1'), 
+('MIE359H1', 'APS112H1'), 
+('MIE359H1', 'MIE358H1'), 
+('MIE363H1', 'MIE236H1'), 
+('MIE363H1', 'MIE262H1');
+
+-- Insert technical elective course prerequisites
+INSERT INTO course_prerequisites (course_code, prerequisite_code) VALUES 
+('APS360H1', 'APS106H1'), 
+('APS360H1', 'MAT187H1'), 
+('APS360H1', 'MAT188H1'), 
+('CSC384H1', 'MIE245H1'), 
+('CSC384H1', 'MIE236H1'), 
+('MIE344H1', 'MIE240H1'), 
+('MIE354H1', 'MIE245H1'), 
+('MIE354H1', 'MIE250H1'), 
+('MIE365H1', 'MIE262H1'), 
+('MIE365H1', 'MIE263H1'), 
+('MIE368H1', 'MIE237H1'), 
+('MIE368H1', 'MIE262H1'), 
+('MIE368H1', 'MIE263H1'), 
+('MIE434H1', 'MIE236H1'), 
+('MIE345H1', 'MIE240H1'), 
+('MIE367H1', 'MIE263H1'), 
+('MIE369H1', 'MIE250H1'), 
+('MIE369H1', 'MIE236H1'), 
+('APS502H1', 'MAT186H1'), 
+('APS502H1', 'MAT187H1'), 
+('APS502H1', 'MAT188H1'), 
+('APS502H1', 'MIE236H1'), 
+('APS502H1', 'MIE237H1'), 
+('MIE451H1', 'MIE353H1'), 
+('MIE451H1', 'MIE350H1'), 
+('MIE524H1', 'MIE350H1'), 
+('MIE524H1', 'MIE236H1'), 
+('MIE524H1', 'MIE245H1'), 
+('MIE562H1', 'MIE262H1'), 
+('MIE566H1', 'MIE236H1'), 
+('MIE424H1', 'MIE365H1'), 
+('MIE457H1', 'MIE353H1'), 
+('MIE457H1', 'MIE350H1'), 
+('MIE469H1', 'MIE236H1'), 
+('MIE469H1', 'MIE358H1'), 
+('MIE535H1', 'MIE358H1'), 
+('MIE542H1', 'MIE240H1');
 
 -- Insert course_plans
 INSERT INTO course_plans (student_id) VALUES (1111);

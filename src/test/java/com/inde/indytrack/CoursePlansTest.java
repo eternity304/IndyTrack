@@ -4,9 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.inde.indytrack.model.CoursePlan;
-import com.inde.indytrack.model.SemesterCourses;
-import com.inde.indytrack.repository.CoursePlanRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,9 +14,6 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.StreamSupport;
 
@@ -29,7 +23,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
 @AutoConfigureMockMvc
-class CoursePlanTests {
+public class CoursePlansTest {
     @Autowired
     private MockMvc mockMvc;
 
@@ -53,7 +47,7 @@ class CoursePlanTests {
         assertEquals("Tyrion", studentNode.get("firstName").asText());
         assertEquals("Lannister", studentNode.get("lastName").asText());
         assertEquals("tyrion.lannister@mail.univ.ca", studentNode.get("email").asText());
-        assertEquals("password", studentNode.get("password").asText());
+        assertEquals("password1234", studentNode.get("password").asText());
 
         ArrayNode semesterCourses = (ArrayNode) receivedJson.get("semesterCoursesList");
         assertFalse(semesterCourses.isEmpty());
@@ -83,7 +77,7 @@ class CoursePlanTests {
         assertEquals("Tyrion", studentNode.get("firstName").asText());
         assertEquals("Lannister", studentNode.get("lastName").asText());
         assertEquals("tyrion.lannister@mail.univ.ca", studentNode.get("email").asText());
-        assertEquals("password", studentNode.get("password").asText());
+        assertEquals("password1234", studentNode.get("password").asText());
 
         ArrayNode semesterCourses = (ArrayNode) receivedJson.get("semesterCoursesList");
         assertFalse(semesterCourses.isEmpty());
