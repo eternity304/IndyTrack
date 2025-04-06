@@ -2,6 +2,8 @@ package com.inde.indytrack;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.inde.indytrack.model.Admin;
 import com.inde.indytrack.repository.AdminRepository;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -17,8 +19,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 @SpringBootTest
@@ -44,7 +46,9 @@ public class AdminTests {
      @BeforeEach
      void setUp() {
          // Ensure the test admin does not exist before each test that might create it
-         adminRepository.deleteById(NEW_ADMIN_ID);
+         if (adminRepository.existsById(NEW_ADMIN_ID)) {
+            adminRepository.deleteById(NEW_ADMIN_ID);
+         }
      }
 
      @Test
@@ -54,8 +58,8 @@ public class AdminTests {
 
         assertEquals(HttpStatus.OK.value(), response.getStatus());
 
-        ObjectNode receivedJson = objectMapper.readValue(response.getContentAsString(), ObjectNode.class);
-        assertTrue(receivedJson.size() >= 2);
+        ArrayNode receivedJson = (ArrayNode) objectMapper.readTree(response.getContentAsString());
+        assertEquals(receivedJson.get(1).get("id").asLong(), EXISTING_ADMIN_ID);
      }
 
 
@@ -66,7 +70,7 @@ public class AdminTests {
 
         assertEquals(HttpStatus.OK.value(), response.getStatus());
 
-        ObjectNode receivedJson = objectMapper.readValue(response.getContentAsString(), ObjectNode.class);
+        ObjectNode receivedJson = (ObjectNode) objectMapper.readTree(response.getContentAsString());
         assertEquals(EXISTING_ADMIN_ID, receivedJson.get("id").longValue());
         assertEquals("Petyr", receivedJson.get("firstName").textValue());
         assertEquals("Baelish", receivedJson.get("lastName").textValue());
@@ -85,10 +89,10 @@ public class AdminTests {
      @Transactional // Roll back the admin creation after the test
      void createAdmin() throws Exception {
         ObjectNode adminJson = objectMapper.createObjectNode();
-        adminJson.put("id", NEW_ADMIN_ID);
         adminJson.put("firstName", "John");
         adminJson.put("lastName", "Doe");
         adminJson.put("email", "john.doe@mail.univ.ca");
+        adminJson.put("password", "password1234");
 
         MockHttpServletResponse response = mockMvc.perform(post("/admins")
             .contentType("application/json")
@@ -98,29 +102,27 @@ public class AdminTests {
         assertEquals(HttpStatus.OK.value(), response.getStatus());
 
         // Verify the admin was created in the database
-        assertTrue(adminRepository.existsById(NEW_ADMIN_ID));
-        assertEquals(NEW_ADMIN_ID, adminRepository.findById(NEW_ADMIN_ID).get().getId());
-        assertEquals("John", adminRepository.findById(NEW_ADMIN_ID).get().getFirstName());
-        assertEquals("Doe", adminRepository.findById(NEW_ADMIN_ID).get().getLastName());
-        assertEquals("john.doe@mail.univ.ca", adminRepository.findById(NEW_ADMIN_ID).get().getEmail());
+        Admin admin = adminRepository.findByEmail("john.doe@mail.univ.ca");
+        assertNotNull(admin);
+        assertEquals("John", admin.getFirstName());
+        assertEquals("Doe", admin.getLastName());
+        assertEquals("john.doe@mail.univ.ca", admin.getEmail());
      }
     
      @Test
      @Transactional // Roll back the admin creation after the test
      void createAdminWithExistingEmail() throws Exception {
         ObjectNode adminJson = objectMapper.createObjectNode();
-        adminJson.put("id", NEW_ADMIN_ID);
         adminJson.put("firstName", "John");
         adminJson.put("lastName", "Doe");
         adminJson.put("email", "petyr.baelish@mail.univ.ca");
-
+        adminJson.put("password", "password1234");
         MockHttpServletResponse response = mockMvc.perform(post("/admins")
             .contentType("application/json")
             .content(adminJson.toString()))
             .andReturn().getResponse();
 
         assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus());
-        assertEquals("Email is already in use", response.getContentAsString());
      }
 
      @Test

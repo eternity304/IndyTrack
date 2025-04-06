@@ -21,6 +21,8 @@ public interface CourseRepository extends JpaRepository<Course, String>, JpaSpec
     )
     Course findByCode(@Param("code") String code);
 
+    boolean existsByCode(@Param("code") String code);
+
     List<Course> findByName(String name);
 
     List<Course> findByCourseType(@Param("courseType") CourseType courseType);
@@ -34,13 +36,6 @@ public interface CourseRepository extends JpaRepository<Course, String>, JpaSpec
         nativeQuery = true
     )
     void deleteByCode(@Param("code") String code);
-
-    @Query(
-        value = "SELECT * FROM courses c " + 
-                "WHERE (:level REGEXP_LIKE(c.code, CONCAT('^[A-Z]+', CAST(:level/100 AS VARCHAR))))",
-                nativeQuery = true
-    )
-    List<Course> findByLevel(@Param("level") Integer level);
 
     @Query(
         value = "SELECT * FROM courses c " +

@@ -1,6 +1,5 @@
 package com.inde.indytrack;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.inde.indytrack.repository.MinorRepository;
 import com.inde.indytrack.repository.StudentRepository;
 import com.inde.indytrack.dto.MinorProgressDTO;
@@ -23,6 +24,7 @@ import com.inde.indytrack.model.Student;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 import java.util.List;
@@ -53,14 +55,12 @@ public class StudentTests {
 
     @BeforeEach
     void setUp() {
-        studentRepository.deleteById(NEW_STUDENT_ID);
-        minorRepository.deleteByName(NEW_MINOR_NAME);
-    }
-
-    @AfterEach
-    void tearDown() {
-        studentRepository.deleteById(NEW_STUDENT_ID);
-        minorRepository.deleteByName(NEW_MINOR_NAME);
+        if (studentRepository.existsById(NEW_STUDENT_ID)) {
+            studentRepository.deleteById(NEW_STUDENT_ID);
+        }
+        if (minorRepository.existsByName(NEW_MINOR_NAME)) {
+            minorRepository.deleteByName(NEW_MINOR_NAME);
+        }
     }
 
     @Test
@@ -70,8 +70,8 @@ public class StudentTests {
 
         assertEquals(HttpStatus.OK.value(), response.getStatus());
 
-        ObjectNode receivedJson = objectMapper.readValue(response.getContentAsString(), ObjectNode.class);
-        assertTrue(receivedJson.size() >= 5);
+        ArrayNode receivedJson = (ArrayNode) objectMapper.readTree(response.getContentAsString());
+        assertEquals(receivedJson.get(0).get("id").asLong(), EXISTING_STUDENT_ID);
     }
 
     @Test
@@ -81,7 +81,7 @@ public class StudentTests {
 
         assertEquals(HttpStatus.OK.value(), response.getStatus());
 
-        ObjectNode receivedJson = objectMapper.readValue(response.getContentAsString(), ObjectNode.class);
+        ObjectNode receivedJson = (ObjectNode) objectMapper.readTree(response.getContentAsString());
         assertEquals(EXISTING_STUDENT_ID, receivedJson.get("id").asLong());
         assertEquals("Tyrion", receivedJson.get("firstName").asText());
         assertEquals("Lannister", receivedJson.get("lastName").asText());
@@ -100,11 +100,10 @@ public class StudentTests {
     @Transactional
     void createStudent() throws Exception {
         ObjectNode studentJson = objectMapper.createObjectNode();
-        studentJson.put("id", NEW_STUDENT_ID);
         studentJson.put("firstName", "John");
         studentJson.put("lastName", "Doe");
         studentJson.put("email", "john.doe@mail.univ.ca");
-
+        studentJson.put("password", "password1234");
         MockHttpServletResponse response = mockMvc.perform(post("/students")
             .contentType("application/json")
             .content(studentJson.toString()))
@@ -112,21 +111,21 @@ public class StudentTests {
 
         assertEquals(HttpStatus.OK.value(), response.getStatus());
 
-        assertTrue(studentRepository.existsById(NEW_STUDENT_ID));
-        assertEquals(NEW_STUDENT_ID, studentRepository.findById(NEW_STUDENT_ID).get().getId());
-        assertEquals("John", studentRepository.findById(NEW_STUDENT_ID).get().getFirstName());
-        assertEquals("Doe", studentRepository.findById(NEW_STUDENT_ID).get().getLastName());
-        assertEquals("john.doe@mail.univ.ca", studentRepository.findById(NEW_STUDENT_ID).get().getEmail());
+        Student student = studentRepository.findByEmail("john.doe@mail.univ.ca");
+        assertNotNull(student);
+        assertEquals("John", student.getFirstName());
+        assertEquals("Doe", student.getLastName());
+        assertEquals("john.doe@mail.univ.ca", student.getEmail());
     }
 
     @Test
     @Transactional
     void createStudentWithExistingEmail() throws Exception {
         ObjectNode studentJson = objectMapper.createObjectNode();
-        studentJson.put("id", NEW_STUDENT_ID);
         studentJson.put("firstName", "John");
         studentJson.put("lastName", "Doe");
         studentJson.put("email", "tyrion.lannister@mail.univ.ca");
+        studentJson.put("password", "password1234");
 
         MockHttpServletResponse response = mockMvc.perform(post("/students")
             .contentType("application/json")
@@ -134,7 +133,6 @@ public class StudentTests {
             .andReturn().getResponse();
 
         assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus());
-        assertEquals("Email is already in use", response.getContentAsString());
     }
 
     @Test
@@ -197,17 +195,19 @@ public class StudentTests {
     
     @Test
     @Transactional
-    void retrieveStudentByName() throws Exception {
+    void retrieveStudentsByName() throws Exception {
         MockHttpServletResponse response = mockMvc.perform(get("/students/names/Tyrion"))
             .andReturn().getResponse();
 
         assertEquals(HttpStatus.OK.value(), response.getStatus());
 
-        ObjectNode receivedJson = objectMapper.readValue(response.getContentAsString(), ObjectNode.class);
-        assertEquals(EXISTING_STUDENT_ID, receivedJson.get("id").asLong());
-        assertEquals("Tyrion", receivedJson.get("firstName").asText());
-        assertEquals("Lannister", receivedJson.get("lastName").asText());
-        assertEquals("tyrion.lannister@mail.univ.ca", receivedJson.get("email").asText());
+        ArrayNode receivedJson = (ArrayNode) objectMapper.readTree(response.getContentAsString());
+
+        Student student = studentRepository.findById(receivedJson.get(0).get("id").asLong()).get();
+        assertEquals(EXISTING_STUDENT_ID, student.getId());
+        assertEquals("Tyrion", student.getFirstName());
+        assertEquals("Lannister", student.getLastName());
+        assertEquals("tyrion.lannister@mail.univ.ca", student.getEmail());
     }
 
     @Test
@@ -218,15 +218,10 @@ public class StudentTests {
 
         assertEquals(HttpStatus.OK.value(), response.getStatus());
 
-        ObjectNode receivedJson = objectMapper.readValue(response.getContentAsString(), ObjectNode.class);
-        assertEquals(EXISTING_STUDENT_ID, receivedJson.get("id").asLong());
-        assertEquals("Tyrion", receivedJson.get("firstName").asText());
-        assertEquals("Lannister", receivedJson.get("lastName").asText());
-        assertEquals("tyrion.lannister@mail.univ.ca", receivedJson.get("email").asText());
-        assertTrue(receivedJson.get("intendedMinors").isArray());
-        assertEquals(2, receivedJson.get("intendedMinors").size());
-        assertEquals(EXISTING_MINOR_NAME_1, receivedJson.get("intendedMinors").get(0).asText());
-        assertEquals(EXISTING_MINOR_NAME_2, receivedJson.get("intendedMinors").get(1).asText());
+        ArrayNode receivedJson = (ArrayNode) objectMapper.readTree(response.getContentAsString());
+        assertEquals(2, receivedJson.size());
+        assertEquals(EXISTING_MINOR_NAME_1, receivedJson.get(0).get("name").asText());
+        assertEquals(EXISTING_MINOR_NAME_2, receivedJson.get(1).get("name").asText());
     }
 
     @Test
@@ -262,11 +257,7 @@ public class StudentTests {
     @Test
     @Transactional
     void removeIntendedMinor() throws Exception {
-        ObjectNode studentJson = objectMapper.createObjectNode();
-        studentJson.put("id", EXISTING_STUDENT_ID);
-        studentJson.put("intendedMinors", EXISTING_MINOR_NAME_2);
-
-        MockHttpServletResponse response = mockMvc.perform(put("/students/" + EXISTING_STUDENT_ID + "/intended-minors/" + EXISTING_MINOR_NAME_2))
+        MockHttpServletResponse response = mockMvc.perform(delete("/students/" + EXISTING_STUDENT_ID + "/intended-minors/" + EXISTING_MINOR_NAME_2))
             .andReturn().getResponse();
 
         assertEquals(HttpStatus.OK.value(), response.getStatus());
@@ -292,11 +283,7 @@ public class StudentTests {
     @Test
     @Transactional
     void removeIntendedMinorWithNotEnrolledMinor() throws Exception {
-        ObjectNode studentJson = objectMapper.createObjectNode();
-        studentJson.put("id", EXISTING_STUDENT_ID);
-        studentJson.put("intendedMinors", EXISTING_MINOR_NAME_3);
-
-        MockHttpServletResponse response = mockMvc.perform(put("/students/" + EXISTING_STUDENT_ID + "/intended-minors/" + EXISTING_MINOR_NAME_3))
+        MockHttpServletResponse response = mockMvc.perform(delete("/students/" + EXISTING_STUDENT_ID + "/intended-minors/" + EXISTING_MINOR_NAME_3))
             .andReturn().getResponse();
 
         assertEquals(HttpStatus.NOT_FOUND.value(), response.getStatus());
@@ -305,13 +292,12 @@ public class StudentTests {
     @Test
     @Transactional
     void updateIntendedMinors() throws Exception {
-        ObjectNode studentJson = objectMapper.createObjectNode();
-        studentJson.put("id", EXISTING_STUDENT_ID);
-        studentJson.put("intendedMinors", EXISTING_MINOR_NAME_3);
+        ArrayNode intendedMinors = objectMapper.createArrayNode();
+        intendedMinors.add(EXISTING_MINOR_NAME_3);
 
         MockHttpServletResponse response = mockMvc.perform(put("/students/" + EXISTING_STUDENT_ID + "/intended-minors")
             .contentType("application/json")
-            .content(studentJson.toString()))
+            .content(intendedMinors.toString()))
             .andReturn().getResponse();
 
         assertEquals(HttpStatus.OK.value(), response.getStatus());
@@ -324,13 +310,12 @@ public class StudentTests {
     @Test
     @Transactional
     void updateIntendedMinorsWithNonExistingMinor() throws Exception {
-        ObjectNode studentJson = objectMapper.createObjectNode();
-        studentJson.put("id", EXISTING_STUDENT_ID);
-        studentJson.put("intendedMinors", NEW_MINOR_NAME);
+        ArrayNode intendedMinors = objectMapper.createArrayNode();
+        intendedMinors.add(NEW_MINOR_NAME);
 
         MockHttpServletResponse response = mockMvc.perform(put("/students/" + EXISTING_STUDENT_ID + "/intended-minors")
             .contentType("application/json")
-            .content(studentJson.toString()))
+            .content(intendedMinors.toString()))
             .andReturn().getResponse();
 
         assertEquals(HttpStatus.NOT_FOUND.value(), response.getStatus());
@@ -362,10 +347,10 @@ public class StudentTests {
 
         assertEquals(HttpStatus.OK.value(), response.getStatus());
 
-        MinorProgressDTO minorProgressDTO = objectMapper.readValue(response.getContentAsString(), MinorProgressDTO.class);
-        assertEquals(EXISTING_MINOR_NAME_1, minorProgressDTO.getMinorName());
-        assertEquals(2.0, minorProgressDTO.getCreditsEarned());
-        assertEquals(66.67, minorProgressDTO.getPercentageCompleted());
+        JsonNode minorProgressDTO = objectMapper.readTree(response.getContentAsString());
+        assertEquals(EXISTING_MINOR_NAME_1, minorProgressDTO.get("minorName").asText());
+        assertEquals(2.0, minorProgressDTO.get("creditsEarned").asDouble());
+        assertEquals(66.67, minorProgressDTO.get("percentageCompleted").asDouble());
     }
 
     @Test

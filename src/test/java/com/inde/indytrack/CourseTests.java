@@ -7,11 +7,11 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 import javax.transaction.Transactional;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.inde.indytrack.model.Course;
 import com.inde.indytrack.model.CourseType;
 import com.inde.indytrack.repository.CourseRepository;
@@ -45,12 +46,9 @@ public class CourseTests {
 
     @BeforeEach
     void setUp() {
-        courseRepository.deleteByCode(NEW_COURSE_CODE);
-    }
-
-    @AfterEach
-    void tearDown() {
-        courseRepository.deleteByCode(NEW_COURSE_CODE);
+        if (courseRepository.existsByCode(NEW_COURSE_CODE)) {
+            courseRepository.deleteByCode(NEW_COURSE_CODE);
+        }
     }
 
     @Test
@@ -60,9 +58,9 @@ public class CourseTests {
 
         assertEquals(HttpStatus.OK.value(), response.getStatus());
 
-        ObjectNode receivedJson = objectMapper.readValue(response.getContentAsString(), ObjectNode.class);
+        ArrayNode receivedJson = (ArrayNode) objectMapper.readTree(response.getContentAsString());
         assertTrue(receivedJson.isArray());
-        assertTrue(response.getContentAsString().contains(EXISTING_COURSE_CODE));
+        assertEquals(receivedJson.get(0).get("code").asText(), "APS100H1");
     }
 
     @Test
@@ -120,7 +118,7 @@ public class CourseTests {
         courseJson.put("courseType", CourseType.CORE.name());
         courseJson.put("creditValue", 0.5);
 
-        MockHttpServletResponse response = mockMvc.perform(put("/courses")
+        MockHttpServletResponse response = mockMvc.perform(put("/courses/" + EXISTING_COURSE_CODE)
             .contentType("application/json")
             .content(courseJson.toString()))
             .andReturn().getResponse();
@@ -143,7 +141,7 @@ public class CourseTests {
         courseJson.put("courseType", CourseType.CORE.name());
         courseJson.put("creditValue", 0.5);
 
-        MockHttpServletResponse response = mockMvc.perform(put("/courses")
+        MockHttpServletResponse response = mockMvc.perform(put("/courses/" + NEW_COURSE_CODE)
             .contentType("application/json")
             .content(courseJson.toString()))
             .andReturn().getResponse();
@@ -158,32 +156,13 @@ public class CourseTests {
             .andReturn().getResponse();
 
         assertEquals(HttpStatus.OK.value(), response.getStatus());
-        assertTrue(courseRepository.findByCode(EXISTING_COURSE_CODE) == null);
+        assertNull(courseRepository.findByCode(EXISTING_COURSE_CODE));
     }
 
     @Test
     @Transactional
     void deleteNonExistingCourse() throws Exception {
         MockHttpServletResponse response = mockMvc.perform(delete("/courses/" + NEW_COURSE_CODE))
-            .andReturn().getResponse();
-
-        assertEquals(HttpStatus.NOT_FOUND.value(), response.getStatus());
-    }
-
-    @Test
-    void getCoursesByLevel() throws Exception {
-        MockHttpServletResponse response = mockMvc.perform(get("/courses/level/1"))
-            .andReturn().getResponse();
-
-        assertEquals(HttpStatus.OK.value(), response.getStatus());
-        ObjectNode receivedJson = objectMapper.readValue(response.getContentAsString(), ObjectNode.class);
-        assertTrue(receivedJson.isArray());
-        assertTrue(response.getContentAsString().contains("1"));
-    }
-
-    @Test
-    void getCoursesByLevelWithNonExistingLevel() throws Exception {
-        MockHttpServletResponse response = mockMvc.perform(get("/courses/level/999"))
             .andReturn().getResponse();
 
         assertEquals(HttpStatus.NOT_FOUND.value(), response.getStatus());

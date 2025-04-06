@@ -19,20 +19,20 @@ import java.util.Set;
 @RequestMapping("/courses")
 public class CourseController {
     @Autowired
-    private final CourseRepository repository;
+    private final CourseRepository courseRepository;
 
-    public CourseController(CourseRepository repository) {
-        this.repository = repository;
+    public CourseController(CourseRepository courseRepository) {
+        this.courseRepository = courseRepository;
     }
 
     @GetMapping
     public List<Course> retrieveAllCourses() {
-        return repository.findAll();
+        return courseRepository.findAll();
     }
 
     @GetMapping("/{code}")
     public Course retrieveCourse(@PathVariable("code") String courseCode) {
-        return repository.findById(courseCode)
+        return courseRepository.findById(courseCode)
                 .orElseThrow(() -> new CourseNotFoundException(courseCode));
     }
 
@@ -49,7 +49,7 @@ public class CourseController {
         if (dto.getPrerequisiteCodes() != null) {
             Set<Course> prerequisites = new HashSet<>();
             for (String prereqCode : dto.getPrerequisiteCodes()) {
-                Course prerequisite = repository.findById(prereqCode)
+                Course prerequisite = courseRepository.findById(prereqCode)
                     .orElseThrow(() -> new CourseNotFoundException(prereqCode));
                 prerequisites.add(prerequisite);
             }
@@ -61,33 +61,29 @@ public class CourseController {
     public Course createCourse(@RequestBody CourseDTO courseDto) {
         Course newCourse = new Course();
         updateCourseWithDTO(newCourse, courseDto);
-        return repository.save(newCourse);
+        return courseRepository.save(newCourse);
     }
 
     @PutMapping("/{code}")
     public Course updateCourse(@RequestBody CourseDTO courseDto, @PathVariable("code") String courseCode) {
-        return repository.findById(courseCode)
+        return courseRepository.findById(courseCode)
                 .map(course -> {
                     updateCourseWithDTO(course, courseDto);
-                    return repository.save(course);
+                    return courseRepository.save(course);
                 })
                 .orElseThrow(() -> new CourseNotFoundException(courseCode));
     }
 
     @DeleteMapping("/{code}")
     public void deleteCourse(@PathVariable("code") String courseCode) {
-        Course course = repository.findById(courseCode)
+        Course course = courseRepository.findById(courseCode)
                 .orElseThrow(() -> new CourseNotFoundException(courseCode));
-        repository.delete(course);
-    }
-
-    @GetMapping("/level/{level}")
-    public List<Course> getCoursesByLevel(@PathVariable("level") Integer level) {
-        List<Course> courses = repository.findByLevel(level);
-        if (courses.isEmpty()) {
-            throw new CourseNotFoundException(level);
-        }
-        return courses;
+        
+        course.getIsPrerequisiteFor().forEach(c -> c.getPrerequisites().remove(course));
+        course.getPrerequisites().forEach(c -> c.getIsPrerequisiteFor().remove(course));
+        course.getMinorRequirements().forEach(mr -> mr.getCourses().remove(course));
+        courseRepository.save(course);
+        courseRepository.delete(course);
     }
 
     @GetMapping("/search")
@@ -99,7 +95,7 @@ public class CourseController {
         @RequestParam(required = false) AcademicFocus academicFocus,
         @RequestParam(required = false) Integer level
     ) {
-        return repository.searchCourses(
+        return courseRepository.searchCourses(
             code,
             name,
             courseType != null ? courseType.name() : null,

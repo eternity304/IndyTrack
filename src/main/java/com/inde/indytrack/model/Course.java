@@ -40,7 +40,7 @@ public class Course {
     private CourseType courseType;
 
     @Column(name = "credit_value")
-    private Long creditValue;
+    private Double creditValue;
 
     @ElementCollection(targetClass = AcademicFocus.class)
     @CollectionTable(name = "course_academic_focus", joinColumns = @JoinColumn(name = "course_code"))
@@ -86,7 +86,7 @@ public class Course {
         String name, 
         String description, 
         CourseType courseType, 
-        Long creditValue, 
+        Double creditValue, 
         Set<AcademicFocus> academicFocus,
         Set<Course> prerequisites
     ) {

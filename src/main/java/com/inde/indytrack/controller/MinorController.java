@@ -132,6 +132,7 @@ public class MinorController {
         }
         try {
             minorRepository.deleteStudentIntendedMinors(minorName);
+            minorRepository.deleteRequirementsByMinorName(minorName);
             minorRepository.delete(minor);
         } catch (Exception e) {
             throw new ResponseStatusException(

@@ -2,13 +2,9 @@ package com.inde.indytrack;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.inde.indytrack.model.CoursePlan;
 import com.inde.indytrack.model.Review;
 import com.inde.indytrack.model.ReviewKey;
-import com.inde.indytrack.model.SemesterCourses;
-import com.inde.indytrack.repository.CoursePlanRepository;
 import com.inde.indytrack.repository.ReviewRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,7 +24,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
 @AutoConfigureMockMvc
-class ReviewTest {
+public class ReviewTest {
     @Autowired
     private MockMvc mockMvc;
 

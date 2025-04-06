@@ -2,7 +2,6 @@ package com.inde.indytrack;
 
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,7 +18,6 @@ import com.inde.indytrack.model.Minor;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.http.MediaType;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -41,12 +39,9 @@ public class MinorTests {
 
     @BeforeEach
     void setUp() {
-        minorRepository.deleteByName(NEW_MINOR_NAME);
-    }
-
-    @AfterEach
-    void tearDown() {
-        minorRepository.deleteByName(NEW_MINOR_NAME);
+        if (minorRepository.existsByName(NEW_MINOR_NAME)) {
+            minorRepository.deleteByName(NEW_MINOR_NAME);
+        }
     }
 
     @Test
@@ -81,14 +76,19 @@ public class MinorTests {
         ObjectNode minorJson = objectMapper.createObjectNode();
         minorJson.put("name", NEW_MINOR_NAME);
         ArrayNode requirementsArray = objectMapper.createArrayNode();
-        ObjectNode requirement = objectMapper.createObjectNode();
-        requirement.put("requiredCredits", 3.0);
-        requirement.putArray("courseCodes").add("CS101");
-        requirementsArray.add(requirement);
+        ObjectNode requirement1 = objectMapper.createObjectNode();
+        requirement1.put("requiredCredits", 1.5);
+        requirement1.putArray("courseCodes").add("MIE360H1");
+        ObjectNode requirement2 = objectMapper.createObjectNode();
+        requirement2.put("requiredCredits", 1.5);
+        requirement2.putArray("courseCodes").add("MIE363H1");
+
+        requirementsArray.add(requirement1);
+        requirementsArray.add(requirement2);
         minorJson.set("requirements", requirementsArray);
 
         MockHttpServletResponse response = mockMvc.perform(post("/minors")
-            .contentType(MediaType.APPLICATION_JSON)
+            .contentType("application/json")
             .content(minorJson.toString()))
             .andReturn().getResponse();
 
@@ -111,7 +111,7 @@ public class MinorTests {
         minorJson.set("requirements", requirementsArray);
 
         MockHttpServletResponse response = mockMvc.perform(post("/minors")
-            .contentType(MediaType.APPLICATION_JSON)
+            .contentType("application/json")
             .content(minorJson.toString()))
             .andReturn().getResponse();
 
@@ -121,64 +121,34 @@ public class MinorTests {
     @Test
     @Transactional
     void updateMinor() throws Exception {
-        // First create a minor
-        ObjectNode createJson = objectMapper.createObjectNode();
-        createJson.put("name", NEW_MINOR_NAME);
+        ObjectNode minorJson = objectMapper.createObjectNode();
+        minorJson.put("name", EXISTING_MINOR_NAME);
         ArrayNode requirementsArray = objectMapper.createArrayNode();
         ObjectNode requirement = objectMapper.createObjectNode();
         requirement.put("requiredCredits", 3.0);
-        requirement.putArray("courseCodes").add("CS101");
+        requirement.putArray("courseCodes").add("APS360H1");
         requirementsArray.add(requirement);
-        createJson.set("requirements", requirementsArray);
-
-        mockMvc.perform(post("/minors")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(createJson.toString()));
-
-        // Then update it
-        ObjectNode updateJson = objectMapper.createObjectNode();
-        updateJson.put("name", NEW_MINOR_NAME);
-        ArrayNode newRequirementsArray = objectMapper.createArrayNode();
-        ObjectNode newRequirement = objectMapper.createObjectNode();
-        newRequirement.put("requiredCredits", 3.0);
-        newRequirement.putArray("courseCodes").add("CS102");
-        newRequirementsArray.add(newRequirement);
-        updateJson.set("requirements", newRequirementsArray);
-
-        MockHttpServletResponse response = mockMvc.perform(put("/minors/" + NEW_MINOR_NAME)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(updateJson.toString()))
+        minorJson.set("requirements", requirementsArray);
+        MockHttpServletResponse response = mockMvc.perform(put("/minors/" + EXISTING_MINOR_NAME)
+            .contentType("application/json")
+            .content(minorJson.toString()))
             .andReturn().getResponse();
 
         assertEquals(HttpStatus.OK.value(), response.getStatus());
-        Minor updatedMinor = minorRepository.findByName(NEW_MINOR_NAME);
+        Minor updatedMinor = minorRepository.findByName(EXISTING_MINOR_NAME);
         assertNotNull(updatedMinor);
-        assertEquals(1, updatedMinor.getRequirements().size());
+        assertEquals(3.0, updatedMinor.getRequirements().iterator().next().getRequiredCredits());
+        assertEquals("APS360H1", updatedMinor.getRequirements().iterator().next().getCourses().iterator().next().getCode());
     }
 
     @Test
     @Transactional
     void deleteMinor() throws Exception {
-        // First create a minor
-        ObjectNode minorJson = objectMapper.createObjectNode();
-        minorJson.put("name", NEW_MINOR_NAME);
-        ArrayNode requirementsArray = objectMapper.createArrayNode();
-        ObjectNode requirement = objectMapper.createObjectNode();
-        requirement.put("requiredCredits", 3.0);
-        requirement.putArray("courseCodes").add("CS101");
-        requirementsArray.add(requirement);
-        minorJson.set("requirements", requirementsArray);
-
-        mockMvc.perform(post("/minors")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(minorJson.toString()));
-
-        // Then delete it
-        MockHttpServletResponse response = mockMvc.perform(delete("/minors/" + NEW_MINOR_NAME))
+        MockHttpServletResponse response = mockMvc.perform(delete("/minors/" + "Nanoengineering"))
             .andReturn().getResponse();
 
         assertEquals(HttpStatus.OK.value(), response.getStatus());
-        assertNull(minorRepository.findByName(NEW_MINOR_NAME));
+        assertNull(minorRepository.findByName("Nanoengineering"));
     }
 
     @Test

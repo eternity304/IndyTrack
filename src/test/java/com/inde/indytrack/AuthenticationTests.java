@@ -7,7 +7,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.http.MediaType;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,10 +35,17 @@ public class AuthenticationTests {
     @Autowired
     private AdminRepository adminRepository;
 
-    private final String TEST_EMAIL = "test@mail.univ.ca";
-    private final String TEST_PASSWORD = "password123";
     private final String EXISTING_STUDENT_EMAIL = "tyrion.lannister@mail.univ.ca";
-    private final String EXISTING_ADMIN_EMAIL = "admin@mail.univ.ca";
+    private final String EXISTING_STUDENT_PASSWORD = "password1234";
+
+    private final String EXISTING_ADMIN_EMAIL = "petyr.baelish@mail.univ.ca";
+    private final String EXISTING_ADMIN_PASSWORD = "password1234";
+
+    private final String NEW_STUDENT_EMAIL = "student@mail.univ.ca";
+    private final String NEW_STUDENT_PASSWORD = "password12345";
+
+    private final String NEW_ADMIN_EMAIL = "admin@mail.univ.ca";
+    private final String NEW_ADMIN_PASSWORD = "password12345";
 
     @Test
     @Transactional
@@ -47,16 +53,16 @@ public class AuthenticationTests {
         ObjectNode registerJson = objectMapper.createObjectNode();
         registerJson.put("firstName", "Test");
         registerJson.put("lastName", "Student");
-        registerJson.put("email", TEST_EMAIL);
-        registerJson.put("password", TEST_PASSWORD);
+        registerJson.put("email", NEW_STUDENT_EMAIL);
+        registerJson.put("password", NEW_STUDENT_PASSWORD);
 
         MockHttpServletResponse response = mockMvc.perform(post("/register/student")
-            .contentType(MediaType.APPLICATION_JSON)
+            .contentType("application/json")
             .content(registerJson.toString()))
             .andReturn().getResponse();
 
         assertEquals(HttpStatus.OK.value(), response.getStatus());
-        assertTrue(studentRepository.existsByEmail(TEST_EMAIL));
+        assertTrue(studentRepository.existsByEmail(NEW_STUDENT_EMAIL));
     }
 
     @Test
@@ -66,10 +72,10 @@ public class AuthenticationTests {
         registerJson.put("firstName", "Test");
         registerJson.put("lastName", "Student");
         registerJson.put("email", EXISTING_STUDENT_EMAIL);
-        registerJson.put("password", TEST_PASSWORD);
+        registerJson.put("password", NEW_STUDENT_PASSWORD);
 
         MockHttpServletResponse response = mockMvc.perform(post("/register/student")
-            .contentType(MediaType.APPLICATION_JSON)
+            .contentType("application/json")
             .content(registerJson.toString()))
             .andReturn().getResponse();
 
@@ -82,16 +88,16 @@ public class AuthenticationTests {
         ObjectNode registerJson = objectMapper.createObjectNode();
         registerJson.put("firstName", "Test");
         registerJson.put("lastName", "Admin");
-        registerJson.put("email", TEST_EMAIL);
-        registerJson.put("password", TEST_PASSWORD);
+        registerJson.put("email", NEW_ADMIN_EMAIL);
+        registerJson.put("password", NEW_ADMIN_PASSWORD);
 
         MockHttpServletResponse response = mockMvc.perform(post("/register/admin")
-            .contentType(MediaType.APPLICATION_JSON)
+            .contentType("application/json")
             .content(registerJson.toString()))
             .andReturn().getResponse();
 
         assertEquals(HttpStatus.OK.value(), response.getStatus());
-        assertTrue(adminRepository.existsByEmail(TEST_EMAIL));
+        assertTrue(adminRepository.existsByEmail(NEW_ADMIN_EMAIL));
     }
 
     @Test
@@ -101,10 +107,10 @@ public class AuthenticationTests {
         registerJson.put("firstName", "Test");
         registerJson.put("lastName", "Admin");
         registerJson.put("email", EXISTING_ADMIN_EMAIL);
-        registerJson.put("password", TEST_PASSWORD);
+        registerJson.put("password", NEW_ADMIN_PASSWORD);
 
         MockHttpServletResponse response = mockMvc.perform(post("/register/admin")
-            .contentType(MediaType.APPLICATION_JSON)
+            .contentType("application/json")
             .content(registerJson.toString()))
             .andReturn().getResponse();
 
@@ -112,13 +118,14 @@ public class AuthenticationTests {
     }
 
     @Test
+    @Transactional
     void studentLogin() throws Exception {
         ObjectNode loginJson = objectMapper.createObjectNode();
         loginJson.put("email", EXISTING_STUDENT_EMAIL);
-        loginJson.put("password", TEST_PASSWORD);
+        loginJson.put("password", EXISTING_STUDENT_PASSWORD);
 
         MockHttpServletResponse response = mockMvc.perform(post("/login/student")
-            .contentType(MediaType.APPLICATION_JSON)
+            .contentType("application/json")
             .content(loginJson.toString()))
             .andReturn().getResponse();
 
@@ -128,13 +135,14 @@ public class AuthenticationTests {
     }
 
     @Test
+    @Transactional
     void studentLoginWithInvalidEmail() throws Exception {
         ObjectNode loginJson = objectMapper.createObjectNode();
-        loginJson.put("email", "nonexistent@mail.univ.ca");
-        loginJson.put("password", TEST_PASSWORD);
+        loginJson.put("email", NEW_STUDENT_EMAIL);
+        loginJson.put("password", EXISTING_STUDENT_PASSWORD);
 
         MockHttpServletResponse response = mockMvc.perform(post("/login/student")
-            .contentType(MediaType.APPLICATION_JSON)
+            .contentType("application/json")
             .content(loginJson.toString()))
             .andReturn().getResponse();
 
@@ -142,13 +150,14 @@ public class AuthenticationTests {
     }
 
     @Test
+    @Transactional
     void studentLoginWithInvalidPassword() throws Exception {
         ObjectNode loginJson = objectMapper.createObjectNode();
         loginJson.put("email", EXISTING_STUDENT_EMAIL);
-        loginJson.put("password", "wrongpassword");
+        loginJson.put("password", NEW_STUDENT_PASSWORD);
 
         MockHttpServletResponse response = mockMvc.perform(post("/login/student")
-            .contentType(MediaType.APPLICATION_JSON)
+            .contentType("application/json")
             .content(loginJson.toString()))
             .andReturn().getResponse();
 
@@ -156,13 +165,14 @@ public class AuthenticationTests {
     }
 
     @Test
+    @Transactional
     void adminLogin() throws Exception {
         ObjectNode loginJson = objectMapper.createObjectNode();
         loginJson.put("email", EXISTING_ADMIN_EMAIL);
-        loginJson.put("password", TEST_PASSWORD);
+        loginJson.put("password", EXISTING_ADMIN_PASSWORD);
 
         MockHttpServletResponse response = mockMvc.perform(post("/login/admin")
-            .contentType(MediaType.APPLICATION_JSON)
+            .contentType("application/json")
             .content(loginJson.toString()))
             .andReturn().getResponse();
 
@@ -172,13 +182,14 @@ public class AuthenticationTests {
     }
 
     @Test
+    @Transactional
     void adminLoginWithInvalidEmail() throws Exception {
         ObjectNode loginJson = objectMapper.createObjectNode();
         loginJson.put("email", "nonexistent@mail.univ.ca");
-        loginJson.put("password", TEST_PASSWORD);
+        loginJson.put("password", NEW_ADMIN_PASSWORD);
 
         MockHttpServletResponse response = mockMvc.perform(post("/login/admin")
-            .contentType(MediaType.APPLICATION_JSON)
+            .contentType("application/json")
             .content(loginJson.toString()))
             .andReturn().getResponse();
 
@@ -186,13 +197,14 @@ public class AuthenticationTests {
     }
 
     @Test
+    @Transactional
     void adminLoginWithInvalidPassword() throws Exception {
         ObjectNode loginJson = objectMapper.createObjectNode();
         loginJson.put("email", EXISTING_ADMIN_EMAIL);
         loginJson.put("password", "wrongpassword");
 
         MockHttpServletResponse response = mockMvc.perform(post("/login/admin")
-            .contentType(MediaType.APPLICATION_JSON)
+            .contentType("application/json")
             .content(loginJson.toString()))
             .andReturn().getResponse();
 

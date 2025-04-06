@@ -114,7 +114,7 @@ public class StudentController {
     }
 
     @GetMapping("names/{name}")
-    public List<StudentDTO> retrieveStudentByName(@PathVariable("name") String name) {
+    public List<StudentDTO> retrieveStudentsByName(@PathVariable("name") String name) {
         return studentRepository.findByFirstOrLastName(name).stream().map(this::convertStudentToDTO).collect(Collectors.toList());
     }
 
