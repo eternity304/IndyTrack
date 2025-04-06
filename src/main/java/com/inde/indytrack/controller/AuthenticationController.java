@@ -1,5 +1,8 @@
 package com.inde.indytrack.controller;
 
+import java.util.Map;
+import java.util.UUID;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,7 +30,7 @@ public class AuthenticationController {
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @PostMapping("/register/student")
-    public ResponseEntity<String> registerStudent(@RequestBody RegisterDTO newStudent) {
+    public ResponseEntity<?> registerStudent(@RequestBody RegisterDTO newStudent) {
         if (studentRepository.existsByEmail(newStudent.getEmail())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email is already in use");
         }
@@ -39,11 +42,11 @@ public class AuthenticationController {
         student.setEmail(newStudent.getEmail());
         student.setPassword(hashedPassword);
         studentRepository.save(student);
-        return ResponseEntity.ok("Student has been registered successfully.");
+        return ResponseEntity.ok(Map.of("message", "Student has been registered successfully."));
     }
 
     @PostMapping("/register/admin")
-    public ResponseEntity<String> registerAdmin(@RequestBody RegisterDTO newAdmin) {
+    public ResponseEntity<?> registerAdmin(@RequestBody RegisterDTO newAdmin) {
         if (adminRepository.existsByEmail(newAdmin.getEmail())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email is already in use");
         }
@@ -55,11 +58,11 @@ public class AuthenticationController {
         admin.setEmail(newAdmin.getEmail());
         admin.setPassword(hashedPassword);
         adminRepository.save(admin);
-        return ResponseEntity.ok("Admin has been registered successfully.");
+        return ResponseEntity.ok(Map.of("message", "Admin has been registered successfully."));
     }
 
     @PostMapping("/login/student")
-    public Student studentLogin(@RequestBody LoginDTO loginDto) {
+    public ResponseEntity<?> studentLogin(@RequestBody LoginDTO loginDto) {
         Student student = studentRepository.findByEmail(loginDto.getEmail());
         if (student == null) {
             throw new StudentNotFoundException(loginDto.getEmail());
@@ -71,11 +74,18 @@ public class AuthenticationController {
         if (!passwordMatches) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password");
         }
-        return student;
+
+        String sessionToken = UUID.randomUUID().toString();
+        return ResponseEntity.ok(Map.of(
+            "firstName", student.getFirstName(), 
+            "lastName", student.getLastName(), 
+            "email", student.getEmail(), 
+            "status", "success", 
+            "token", sessionToken));
     }
 
     @PostMapping("/login/admin")
-    public Admin adminLogin(@RequestBody LoginDTO loginDto) {
+    public ResponseEntity<?> adminLogin(@RequestBody LoginDTO loginDto) {
         Admin admin = adminRepository.findByEmail(loginDto.getEmail());
         if (admin == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Admin with email " + loginDto.getEmail() + " not found");
@@ -87,7 +97,14 @@ public class AuthenticationController {
         if (!passwordMatches) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password");
         }
-        return admin;
+
+        String sessionToken = UUID.randomUUID().toString();
+        return ResponseEntity.ok(Map.of(
+            "firstName", admin.getFirstName(), 
+            "lastName", admin.getLastName(), 
+            "email", admin.getEmail(), 
+            "status", "success", 
+            "token", sessionToken));
     }
 
 }
